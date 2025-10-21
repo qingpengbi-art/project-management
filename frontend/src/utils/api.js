@@ -11,13 +11,30 @@ const getBaseURL = () => {
   
   // 生产环境：动态检测当前访问地址并设置对应的API地址
   const currentHost = window.location.hostname
+  const currentProtocol = window.location.protocol
   const currentPort = window.location.port
   
-  console.log('当前访问地址:', currentHost, '端口:', currentPort)
+  console.log('当前访问地址:', currentHost, '协议:', currentProtocol, '端口:', currentPort)
   
-  // 构建API URL：使用当前主机的5001端口
-  const apiUrl = `http://${currentHost}:5001/api`
-  console.log('API地址:', apiUrl)
+  // 判断是否为云端部署（Render/Railway等）
+  // 云端部署特征：使用HTTPS且域名包含.onrender.com、.railway.app等
+  const isCloudDeployment = currentProtocol === 'https:' && (
+    currentHost.includes('.onrender.com') || 
+    currentHost.includes('.railway.app') ||
+    currentHost.includes('.vercel.app') ||
+    currentHost.includes('.netlify.app')
+  )
+  
+  let apiUrl
+  if (isCloudDeployment) {
+    // 云端部署：使用HTTPS，不指定端口，后端和前端在同一域名
+    apiUrl = `${currentProtocol}//${currentHost}/api`
+    console.log('云端部署模式 - API地址:', apiUrl)
+  } else {
+    // 本地或局域网部署：使用5001端口
+    apiUrl = `http://${currentHost}:5001/api`
+    console.log('本地部署模式 - API地址:', apiUrl)
+  }
   
   return apiUrl
 }
