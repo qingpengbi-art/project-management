@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>详细登录调试工具</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button { padding: 10px 20px; margin: 10px 5px; }
+        #results { max-height: 400px; overflow-y: auto; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>详细登录调试工具</h1>
+    
+    <div class="section">
+        <h2>环境信息</h2>
+        <p>当前地址: <span id="current-url"></span></p>
+        <p>API地址: <span id="api-url"></span></p>
+        <p>Origin: <span id="origin"></span></p>
+    </div>
+
+    <div class="section">
+        <h2>测试控制</h2>
+        <button onclick="testCORS()">测试CORS预检</button>
+        <button onclick="testLogin()">测试登录</button>
+        <button onclick="testWithAxios()">使用Axios测试</button>
+        <button onclick="clearResults()">清空结果</button>
+    </div>
+
+    <div class="section">
+        <h2>测试结果</h2>
+        <div id="results"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const hostname = window.location.hostname;
+        const port = window.location.port;
+        const origin = window.location.origin;
+        const apiUrl = `http://${hostname}:5001/api`;
+
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('api-url').textContent = apiUrl;
+        document.getElementById('origin').textContent = origin;
+
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            resultsDiv.appendChild(div);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testCORS() {
+            try {
+                addResult('开始CORS预检测试...');
+                
+                const response = await fetch(`${apiUrl}/auth/login`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': origin,
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+
+                addResult(`CORS预检响应状态: ${response.status}`, 'info');
+                
+                const headers = {};
+                for (let [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                addResult(`CORS预检响应头: <pre>${JSON.stringify(headers, null, 2)}</pre>`, 'info');
+
+                if (response.ok) {
+                    addResult('CORS预检测试成功', 'success');
+                } else {
+                    addResult('CORS预检测试失败', 'error');
+                }
+            } catch (error) {
+                addResult(`CORS预检测试异常: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            try {
+                addResult('开始登录测试...');
+                
+                const response = await fetch(`${apiUrl}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': origin
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        username: 'gaojimin',
+                        password: 'td123456'
+                    })
+                });
+
+                addResult(`登录响应状态: ${response.status} ${response.statusText}`, 'info');
+                
+                const headers = {};
+                for (let [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                addResult(`登录响应头: <pre>${JSON.stringify(headers, null, 2)}</pre>`, 'info');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`登录响应数据: <pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                    
+                    if (data.success) {
+                        addResult('登录测试成功！', 'success');
+                    } else {
+                        addResult(`登录失败: ${data.message}`, 'error');
+                    }
+                } else {
+                    const errorText = await response.text();
+                    addResult(`登录失败: ${response.status} - ${errorText}`, 'error');
+                }
+            } catch (error) {
+                addResult(`登录测试异常: ${error.message}`, 'error');
+                console.error('详细错误:', error);
+            }
+        }
+
+        async function testWithAxios() {
+            try {
+                addResult('开始Axios登录测试...');
+                
+                // 配置axios实例，模拟前端配置
+                const api = axios.create({
+                    baseURL: apiUrl,
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const response = await api.post('/auth/login', {
+                    username: 'gaojimin',
+                    password: 'td123456'
+                });
+
+                addResult(`Axios响应状态: ${response.status}`, 'info');
+                addResult(`Axios响应数据: <pre>${JSON.stringify(response.data, null, 2)}</pre>`, 'info');
+
+                if (response.data.success) {
+                    addResult('Axios登录测试成功！', 'success');
+                } else {
+                    addResult(`Axios登录失败: ${response.data.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`Axios测试异常: ${error.message}`, 'error');
+                if (error.response) {
+                    addResult(`Axios错误响应: ${error.response.status} - ${JSON.stringify(error.response.data)}`, 'error');
+                }
+                console.error('Axios详细错误:', error);
+            }
+        }
+
+        // 页面加载时自动运行基本测试
+        window.onload = function() {
+            addResult('页面加载完成，开始基本测试...');
+            setTimeout(() => {
+                testCORS();
+                setTimeout(() => {
+                    testLogin();
+                }, 1000);
+            }, 500);
+        };
+    </script>
+</body>
+</html>

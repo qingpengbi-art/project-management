@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API配置调试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 4px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>API配置调试工具</h1>
+    
+    <div class="result">
+        <h3>当前环境信息</h3>
+        <p>主机名: <span id="hostname"></span></p>
+        <p>端口: <span id="port"></span></p>
+        <p>完整URL: <span id="fullUrl"></span></p>
+    </div>
+    
+    <div class="result">
+        <h3>动态API地址</h3>
+        <p>计算出的API地址: <span id="apiUrl"></span></p>
+    </div>
+    
+    <div>
+        <button onclick="testLogin()">测试登录API</button>
+        <button onclick="testHealth()">测试健康检查</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        // 获取环境信息
+        document.getElementById('hostname').textContent = window.location.hostname;
+        document.getElementById('port').textContent = window.location.port || '80';
+        document.getElementById('fullUrl').textContent = window.location.href;
+        
+        // 动态计算API地址（模拟前端逻辑）
+        function getBaseURL() {
+            const currentHost = window.location.hostname;
+            const apiUrl = `http://${currentHost}:5001/api`;
+            return apiUrl;
+        }
+        
+        const apiUrl = getBaseURL();
+        document.getElementById('apiUrl').textContent = apiUrl;
+        
+        function addResult(message, isError = false) {
+            const div = document.createElement('div');
+            div.className = `result ${isError ? 'error' : 'success'}`;
+            div.innerHTML = `<p>${new Date().toLocaleTimeString()}: ${message}</p>`;
+            document.getElementById('results').appendChild(div);
+        }
+        
+        async function testHealth() {
+            try {
+                const response = await fetch(`${apiUrl.replace('/api', '')}/health`);
+                const data = await response.json();
+                addResult(`健康检查成功: ${JSON.stringify(data)}`);
+            } catch (error) {
+                addResult(`健康检查失败: ${error.message}`, true);
+            }
+        }
+        
+        async function testLogin() {
+            try {
+                const response = await fetch(`${apiUrl}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include', // 添加凭证支持
+                    body: JSON.stringify({
+                        username: 'gaojimin',
+                        password: 'td123456'
+                    })
+                });
+                
+                addResult(`登录响应状态: ${response.status} ${response.statusText}`);
+                addResult(`响应头: ${JSON.stringify([...response.headers.entries()])}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                addResult(`登录API测试成功: ${JSON.stringify(data)}`);
+                
+                // 测试认证状态检查
+                setTimeout(testAuthCheck, 1000);
+            } catch (error) {
+                addResult(`登录API测试失败: ${error.message}`, true);
+            }
+        }
+        
+        async function testAuthCheck() {
+            try {
+                const response = await fetch(`${apiUrl}/auth/check`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                addResult(`认证检查成功: ${JSON.stringify(data)}`);
+            } catch (error) {
+                addResult(`认证检查失败: ${error.message}`, true);
+            }
+        }
+        
+        // 页面加载时自动测试
+        window.onload = function() {
+            addResult(`页面加载完成，API地址: ${apiUrl}`);
+        };
+    </script>
+</body>
+</html>

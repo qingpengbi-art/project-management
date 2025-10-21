@@ -1,0 +1,261 @@
+// 苹果风格的主题样式
+:root {
+  // 苹果风格颜色变量
+  --apple-blue: #007aff;
+  --apple-green: #34c759;
+  --apple-orange: #ff9500;
+  --apple-red: #ff3b30;
+  --apple-purple: #af52de;
+  --apple-gray: #8e8e93;
+  --apple-gray-light: #f2f2f7;
+  --apple-gray-dark: #1c1c1e;
+  
+  // 背景颜色
+  --bg-primary: #ffffff;
+  --bg-secondary: #f2f2f7;
+  --bg-tertiary: #ffffff;
+  
+  // 文字颜色
+  --text-primary: #000000;
+  --text-secondary: #3c3c43;
+  --text-tertiary: #8e8e93;
+  
+  // 边框颜色
+  --border-color: #d1d1d6;
+  --border-radius: 12px;
+  --border-radius-small: 8px;
+  
+  // 阴影
+  --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+// 全局样式重置
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// 苹果风格卡片
+.apple-card {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-1px);
+  }
+}
+
+// 苹果风格按钮
+.apple-button {
+  background: var(--apple-blue);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-small);
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+  }
+  
+  &.secondary {
+    background: var(--bg-tertiary);
+    color: var(--apple-blue);
+    border: 1px solid var(--border-color);
+    
+    &:hover {
+      background: var(--apple-gray-light);
+    }
+  }
+  
+  &.success {
+    background: var(--apple-green);
+    
+    &:hover {
+      background: #28a745;
+    }
+  }
+  
+  &.warning {
+    background: var(--apple-orange);
+    
+    &:hover {
+      background: #e68900;
+    }
+  }
+  
+  &.danger {
+    background: var(--apple-red);
+    
+    &:hover {
+      background: #dc3545;
+    }
+  }
+}
+
+// 进度条样式
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--apple-gray-light);
+  border-radius: 3px;
+  overflow: hidden;
+  
+  .progress-fill {
+    height: 100%;
+    background: var(--apple-blue);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    
+    &.success {
+      background: var(--apple-green);
+    }
+    
+    &.warning {
+      background: var(--apple-orange);
+    }
+  }
+}
+
+// 状态标签
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: var(--border-radius-small);
+  font-size: 12px;
+  font-weight: 500;
+  
+  &.planning {
+    background: rgba(142, 142, 147, 0.1);
+    color: var(--apple-gray);
+  }
+  
+  &.in-progress {
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--apple-blue);
+  }
+  
+  &.completed {
+    background: rgba(52, 199, 89, 0.1);
+    color: var(--apple-green);
+  }
+  
+  &.paused {
+    background: rgba(255, 149, 0, 0.1);
+    color: var(--apple-orange);
+  }
+  
+  &.cancelled {
+    background: rgba(255, 59, 48, 0.1);
+    color: var(--apple-red);
+  }
+}
+
+// 优先级标识
+.priority-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  
+  &.priority-1 { background: var(--apple-gray); }
+  &.priority-2 { background: var(--apple-blue); }
+  &.priority-3 { background: var(--apple-green); }
+  &.priority-4 { background: var(--apple-orange); }
+  &.priority-5 { background: var(--apple-red); }
+}
+
+// Element Plus 样式覆盖
+.el-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  
+  .el-card__body {
+    padding: 20px;
+  }
+}
+
+.el-button {
+  border-radius: var(--border-radius-small);
+  font-weight: 500;
+  
+  &.el-button--primary {
+    background: var(--apple-blue);
+    border-color: var(--apple-blue);
+  }
+  
+  &.el-button--success {
+    background: var(--apple-green);
+    border-color: var(--apple-green);
+  }
+  
+  &.el-button--warning {
+    background: var(--apple-orange);
+    border-color: var(--apple-orange);
+  }
+  
+  &.el-button--danger {
+    background: var(--apple-red);
+    border-color: var(--apple-red);
+  }
+}
+
+.el-input__wrapper {
+  border-radius: var(--border-radius-small);
+}
+
+.el-select .el-input__wrapper {
+  border-radius: var(--border-radius-small);
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .apple-card {
+    margin: 10px;
+    border-radius: var(--border-radius-small);
+  }
+}
+
+// 动画效果
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active, .slide-up-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-up-enter-from {
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+.slide-up-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
+}

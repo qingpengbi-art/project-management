@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+backend.log
+frontend.log
+logs/
+
+# 数据库（生产环境在云端）
+*.db
+*.db-journal
+data/
+
+# 临时文件
+*.tmp
+*.cache
+cookies.txt
+*.zip
+
+# 环境变量
+.env
+.env.local
+*.env
+
+# 构建产物（不需要，Railway会自动构建）
+# frontend/dist/  # 注释掉，Railway需要
+

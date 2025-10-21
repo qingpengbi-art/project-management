@@ -1,0 +1,13 @@
+Flask==3.0.3
+Flask-CORS==4.0.0
+Flask-SQLAlchemy==3.1.1
+python-dotenv==1.0.1
+Werkzeug==3.0.3
+SQLAlchemy==2.0.35
+pypinyin==0.51.0
+click==8.1.7
+itsdangerous==2.2.0
+Jinja2==3.1.4
+MarkupSafe==2.1.5
+blinker==1.8.2
+typing_extensions==4.12.2
