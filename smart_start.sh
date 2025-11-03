@@ -62,6 +62,17 @@ def auto_import_data():
         print(f"📊 将导入：{len(data['users'])}用户, {len(data['projects'])}项目, {len(data['modules'])}模块")
         
         try:
+            # 先清空所有表（避免ID冲突）
+            print("🗑️  清空现有数据...")
+            db.session.query(ModuleWorkRecord).delete()
+            db.session.query(ModuleAssignment).delete()
+            db.session.query(ProjectMember).delete()
+            db.session.query(ProjectModule).delete()
+            db.session.query(Project).delete()
+            db.session.query(User).delete()
+            db.session.commit()
+            print("   ✅ 数据清空完成")
+            
             # 导入用户
             print("👥 导入用户...")
             for user_data in data['users']:
