@@ -75,5 +75,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # 数据卷
 VOLUME ["/app/data"]
 
-# 启动应用
-CMD ["/app/docker-start.sh"]
+# 启动应用（使用智能启动脚本，自动导入数据）
+CMD ["/app/smart_start.sh"]
