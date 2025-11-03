@@ -24,8 +24,12 @@ if [ ! -f "$DB_PATH" ]; then
         cat > /tmp/auto_import.py << 'PYTHON_SCRIPT'
 import json
 import sys
+import os
 from datetime import datetime
-sys.path.insert(0, '/app/backend')
+
+# 添加正确的路径
+sys.path.insert(0, '/app')
+os.chdir('/app')
 
 from backend.models.database import (
     db, User, Project, ProjectModule, ModuleAssignment, 
