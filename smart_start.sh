@@ -8,13 +8,25 @@ echo "🚀 启动项目管理系统..."
 # 数据库路径
 DB_PATH="${DATABASE_PATH:-/app/data/project_management.db}"
 EXPORT_FILE="/app/database_export.json"
+IMPORT_FLAG="/app/data/.data_imported"
+
+# 检查是否有导出文件且未导入过
+if [ -f "$EXPORT_FILE" ] && [ ! -f "$IMPORT_FLAG" ]; then
+    echo "📥 检测到数据导出文件，准备导入..."
+    
+    # 如果数据库已存在，先删除（这是默认/空数据库）
+    if [ -f "$DB_PATH" ]; then
+        echo "🗑️  删除旧数据库，准备导入新数据..."
+        rm -f "$DB_PATH"
+    fi
+fi
 
 # 检查数据库是否存在
 if [ ! -f "$DB_PATH" ]; then
-    echo "📊 首次启动，初始化数据库..."
+    echo "📊 初始化数据库..."
     
     # 检查是否有导出的数据文件
-    if [ -f "$EXPORT_FILE" ]; then
+    if [ -f "$EXPORT_FILE" ] && [ ! -f "$IMPORT_FLAG" ]; then
         echo "📥 发现数据导出文件，自动导入数据..."
         
         # 设置环境变量确保导入脚本可以运行
@@ -169,8 +181,9 @@ PYTHON_SCRIPT
         
         if [ $? -eq 0 ]; then
             echo "✅ 数据导入成功！"
-            # 可选：导入后删除或重命名文件，避免重复导入
-            mv "$EXPORT_FILE" "${EXPORT_FILE}.imported"
+            # 创建导入标记文件，避免重复导入
+            touch "$IMPORT_FLAG"
+            echo "📝 已创建导入标记，下次启动将跳过导入"
         else
             echo "⚠️ 数据导入失败，使用默认数据"
         fi
