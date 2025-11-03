@@ -131,6 +131,19 @@ class ModuleService:
             for module in modules:
                 module_dict = module.to_dict()
                 
+                # 添加模块成员列表
+                assignments = ModuleAssignment.query.filter_by(module_id=module.id).all()
+                assigned_users = []
+                for assignment in assignments:
+                    if assignment.user:
+                        assigned_users.append({
+                            'id': assignment.user.id,
+                            'name': assignment.user.name,
+                            'position': assignment.user.position,
+                            'role': assignment.role
+                        })
+                module_dict['assigned_users'] = assigned_users
+                
                 # 添加最新进度记录
                 latest_record = ModuleProgressRecord.query.filter_by(module_id=module.id)\
                     .order_by(desc(ModuleProgressRecord.updated_at)).first()
@@ -155,6 +168,67 @@ class ModuleService:
                 'success': False,
                 'message': f'获取模块列表失败: {str(e)}',
                 'data': []
+            }
+    
+    @staticmethod
+    def update_module(module_id: int, module_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        更新模块基本信息
+        
+        Args:
+            module_id: 模块ID
+            module_data: 模块数据
+            
+        Returns:
+            更新结果
+        """
+        try:
+            module = ProjectModule.query.get(module_id)
+            if not module:
+                return {
+                    'success': False,
+                    'message': '模块不存在',
+                    'data': None
+                }
+            
+            # 更新可编辑的字段
+            if 'name' in module_data:
+                module.name = module_data['name']
+            
+            if 'description' in module_data:
+                module.description = module_data['description']
+            
+            if 'status' in module_data:
+                module.status = ModuleStatus[module_data['status'].upper()] if isinstance(module_data['status'], str) else module_data['status']
+            
+            if 'start_date' in module_data:
+                if module_data['start_date']:
+                    module.start_date = datetime.strptime(module_data['start_date'], '%Y-%m-%d').date()
+                else:
+                    module.start_date = None
+            
+            if 'end_date' in module_data:
+                if module_data['end_date']:
+                    module.end_date = datetime.strptime(module_data['end_date'], '%Y-%m-%d').date()
+                else:
+                    module.end_date = None
+            
+            module.updated_at = datetime.now()
+            
+            db.session.commit()
+            
+            return {
+                'success': True,
+                'message': '模块更新成功',
+                'data': module.to_dict()
+            }
+            
+        except Exception as e:
+            db.session.rollback()
+            return {
+                'success': False,
+                'message': f'模块更新失败: {str(e)}',
+                'data': None
             }
     
     @staticmethod
@@ -822,6 +896,96 @@ class ModuleService:
             }
     
     @staticmethod
+    def update_work_record(record_id: int, work_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        更新工作记录（部门主管专用）
+        
+        Args:
+            record_id: 工作记录ID
+            work_data: 更新的数据
+            
+        Returns:
+            更新结果
+        """
+        try:
+            work_record = ModuleWorkRecord.query.get(record_id)
+            if not work_record:
+                return {
+                    'success': False,
+                    'message': '工作记录不存在',
+                    'data': None
+                }
+            
+            # 更新字段
+            if 'week_start' in work_data:
+                work_record.week_start = datetime.strptime(work_data['week_start'], '%Y-%m-%d').date()
+            if 'week_end' in work_data:
+                work_record.week_end = datetime.strptime(work_data['week_end'], '%Y-%m-%d').date()
+            if 'work_content' in work_data:
+                work_record.work_content = work_data['work_content']
+            if 'achievements' in work_data:
+                work_record.achievements = work_data['achievements']
+            if 'issues' in work_data:
+                work_record.issues = work_data['issues']
+            if 'next_week_plan' in work_data:
+                work_record.next_week_plan = work_data['next_week_plan']
+            
+            work_record.updated_at = datetime.now()
+            
+            db.session.commit()
+            
+            return {
+                'success': True,
+                'message': '工作记录更新成功',
+                'data': work_record.to_dict()
+            }
+            
+        except Exception as e:
+            db.session.rollback()
+            return {
+                'success': False,
+                'message': f'更新工作记录失败: {str(e)}',
+                'data': None
+            }
+    
+    @staticmethod
+    def delete_work_record(record_id: int) -> Dict[str, Any]:
+        """
+        删除工作记录（部门主管专用）
+        
+        Args:
+            record_id: 工作记录ID
+            
+        Returns:
+            删除结果
+        """
+        try:
+            work_record = ModuleWorkRecord.query.get(record_id)
+            if not work_record:
+                return {
+                    'success': False,
+                    'message': '工作记录不存在',
+                    'data': None
+                }
+            
+            db.session.delete(work_record)
+            db.session.commit()
+            
+            return {
+                'success': True,
+                'message': '工作记录删除成功',
+                'data': None
+            }
+            
+        except Exception as e:
+            db.session.rollback()
+            return {
+                'success': False,
+                'message': f'删除工作记录失败: {str(e)}',
+                'data': None
+            }
+    
+    @staticmethod
     def get_latest_work_content(module_id: int) -> Dict[str, Any]:
         """
         获取模块最新工作内容
@@ -936,7 +1100,7 @@ class ModuleService:
             包含所有项目模块信息的字典
         """
         try:
-            from backend.models.database import Project, ProjectModule, User, ProjectMember, ProjectMemberRole, ModuleWorkRecord
+            from backend.models.database import Project, ProjectModule, User, ProjectMember, ProjectMemberRole, ModuleWorkRecord, ModuleAssignment
             from sqlalchemy import desc
             
             projects = Project.query.all()
@@ -948,11 +1112,19 @@ class ModuleService:
                 
                 for module in modules:
                     module_dict = module.to_dict()
-                    # 添加负责人信息
-                    if module.assigned_to_id:
-                        assigned_user = User.query.get(module.assigned_to_id)
-                        if assigned_user:
-                            module_dict['assigned_to'] = assigned_user.to_dict()
+                    
+                    # 添加分配的用户列表
+                    assignments = ModuleAssignment.query.filter_by(module_id=module.id).all()
+                    assigned_users = []
+                    for assignment in assignments:
+                        if assignment.user:
+                            assigned_users.append({
+                                'id': assignment.user.id,
+                                'name': assignment.user.name,
+                                'position': assignment.user.position,
+                                'role': assignment.role
+                            })
+                    module_dict['assigned_users'] = assigned_users
                     
                     # 添加最近2条工作记录
                     recent_works = ModuleWorkRecord.query.filter_by(module_id=module.id)\
@@ -1037,7 +1209,7 @@ class ModuleService:
                     'data': []
                 }
             
-            from backend.models.database import Project, ProjectModule, User, ProjectMember, ProjectMemberRole, ModuleWorkRecord
+            from backend.models.database import Project, ProjectModule, User, ProjectMember, ProjectMemberRole, ModuleWorkRecord, ModuleAssignment
             from sqlalchemy import desc
             
             projects = Project.query.filter(Project.id.in_(project_ids)).all()
@@ -1049,11 +1221,19 @@ class ModuleService:
                 
                 for module in modules:
                     module_dict = module.to_dict()
-                    # 添加负责人信息
-                    if module.assigned_to_id:
-                        assigned_user = User.query.get(module.assigned_to_id)
-                        if assigned_user:
-                            module_dict['assigned_to'] = assigned_user.to_dict()
+                    
+                    # 添加分配的用户列表
+                    assignments = ModuleAssignment.query.filter_by(module_id=module.id).all()
+                    assigned_users = []
+                    for assignment in assignments:
+                        if assignment.user:
+                            assigned_users.append({
+                                'id': assignment.user.id,
+                                'name': assignment.user.name,
+                                'position': assignment.user.position,
+                                'role': assignment.role
+                            })
+                    module_dict['assigned_users'] = assigned_users
                     
                     # 添加最近2条工作记录
                     recent_works = ModuleWorkRecord.query.filter_by(module_id=module.id)\

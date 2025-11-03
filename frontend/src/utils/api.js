@@ -185,6 +185,11 @@ export const moduleApi = {
     return api.post(`/modules/projects/${projectId}`, data)
   },
   
+  // 更新模块基本信息
+  updateModule(moduleId, data) {
+    return api.put(`/modules/${moduleId}`, data)
+  },
+  
   // 更新模块进度
   updateModuleProgress(moduleId, data) {
     return api.put(`/modules/${moduleId}/progress`, data)
@@ -238,6 +243,16 @@ export const moduleApi = {
   // 获取模块工作记录
   getModuleWorkRecords(moduleId, limit = 10) {
     return api.get(`/modules/${moduleId}/work-records`, { params: { limit } })
+  },
+  
+  // 更新工作记录（部门主管专用）
+  updateWorkRecord(recordId, data) {
+    return api.put(`/modules/work-records/${recordId}`, data)
+  },
+  
+  // 删除工作记录（部门主管专用）
+  deleteWorkRecord(recordId) {
+    return api.delete(`/modules/work-records/${recordId}`)
   },
   
   // 获取模块最新工作内容

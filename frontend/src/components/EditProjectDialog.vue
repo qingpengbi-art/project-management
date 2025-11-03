@@ -30,24 +30,14 @@
         </el-select>
       </el-form-item>
       
-      <!-- 合作方（仅横向项目显示） -->
-      <el-form-item v-if="form.project_source === 'horizontal'" label="合作方" prop="partner">
+      <!-- 合作方（横向和纵向项目显示） -->
+      <el-form-item v-if="form.project_source === 'horizontal' || form.project_source === 'vertical'" label="合作方" prop="partner">
         <el-input
           v-model="form.partner"
-          placeholder="请输入合作方名称"
+          placeholder="请输入合作方名称（选填）"
           maxlength="100"
           show-word-limit
         />
-      </el-form-item>
-      
-      <!-- 项目优先级 -->
-      <el-form-item label="优先级" prop="priority">
-        <el-select v-model="form.priority" placeholder="选择优先级" style="width: 100%;">
-          <el-option label="低" :value="1" />
-          <el-option label="中" :value="2" />
-          <el-option label="高" :value="3" />
-          <el-option label="紧急" :value="4" />
-        </el-select>
       </el-form-item>
       
       <!-- 项目金额 -->
@@ -66,8 +56,8 @@
       <!-- 项目状态 - 根据项目类型动态显示 -->
       <el-form-item label="项目状态" prop="status">
         <el-select v-model="form.status" placeholder="选择项目状态" style="width: 100%;">
-          <!-- 横向和纵向项目的状态 -->
-          <template v-if="form.project_source === 'horizontal' || form.project_source === 'vertical'">
+          <!-- 横向项目的状态 -->
+          <template v-if="form.project_source === 'horizontal'">
             <el-option label="初步接触" value="initial_contact" />
             <el-option label="提交方案" value="proposal_submitted" />
             <el-option label="提交报价" value="quotation_submitted" />
@@ -78,6 +68,13 @@
             <el-option label="维保期内" value="warranty_period" />
             <el-option label="维保期外" value="post_warranty" />
             <el-option label="不再跟进" value="no_follow_up" />
+          </template>
+          <!-- 纵向项目专用状态 -->
+          <template v-else-if="form.project_source === 'vertical'">
+            <el-option label="申报阶段" value="vertical_declaration" />
+            <el-option label="审核阶段" value="vertical_review" />
+            <el-option label="审核通过" value="vertical_approved" />
+            <el-option label="审核未通过" value="vertical_rejected" />
           </template>
           <!-- 自研项目的状态 -->
           <template v-else-if="form.project_source === 'self_developed'">
@@ -160,7 +157,6 @@ const form = reactive({
   description: '',
   project_source: 'horizontal',
   partner: '',
-  priority: 2,
   status: 'initial_contact',
   amount: null,
   start_date: '',
@@ -182,9 +178,6 @@ const rules = {
   ],
   description: [
     { max: 500, message: '项目描述不能超过 500 个字符', trigger: 'blur' }
-  ],
-  priority: [
-    { required: true, message: '请选择优先级', trigger: 'change' }
   ],
   status: [
     { required: true, message: '请选择项目状态', trigger: 'change' }
@@ -226,20 +219,28 @@ const handleProjectSourceChange = (source) => {
   if (source === 'self_developed') {
     // 自研项目默认为进行中
     form.status = 'project_implementation'
-    // 清空合作方
+    // 清空合作方（自研不需要合作方）
     form.partner = ''
-  } else if (form.status !== 'initial_contact' && 
-             form.status !== 'proposal_submitted' && 
-             form.status !== 'quotation_submitted' &&
-             form.status !== 'user_confirmation' &&
-             form.status !== 'contract_signed' &&
-             form.status !== 'project_implementation' &&
-             form.status !== 'project_acceptance' &&
-             form.status !== 'warranty_period' &&
-             form.status !== 'post_warranty' &&
-             form.status !== 'no_follow_up') {
-    // 横向/纵向项目，如果当前状态不合法，重置为初步接触
-    form.status = 'initial_contact'
+  } else if (source === 'vertical') {
+    // 纵向项目
+    // 检查当前状态是否是纵向专用状态
+    const verticalStatuses = ['vertical_declaration', 'vertical_review', 'vertical_approved', 'vertical_rejected']
+    if (!verticalStatuses.includes(form.status)) {
+      // 如果不是纵向状态，设置默认值
+      form.status = 'vertical_declaration'
+    }
+    // 纵向项目可以有合作方，不清空
+  } else if (source === 'horizontal') {
+    // 横向项目
+    // 检查当前状态是否是横向有效状态
+    const horizontalStatuses = ['initial_contact', 'proposal_submitted', 'quotation_submitted', 
+                               'user_confirmation', 'contract_signed', 'project_implementation',
+                               'project_acceptance', 'warranty_period', 'post_warranty', 'no_follow_up']
+    if (!horizontalStatuses.includes(form.status)) {
+      // 如果不是横向状态，设置默认值
+      form.status = 'initial_contact'
+    }
+    // 横向项目可以有合作方，不清空
   }
 }
 
@@ -252,7 +253,6 @@ const initDialog = async () => {
     Object.assign(form, {
       name: props.project.name || '',
       description: props.project.description || '',
-      priority: props.project.priority || 2,
       status: props.project.status || 'initial_contact',
       project_source: props.project.project_source || 'horizontal',
       partner: props.project.partner || '',
@@ -298,7 +298,6 @@ const resetForm = () => {
   Object.assign(form, {
     name: '',
     description: '',
-    priority: 2,
     status: 'initial_contact',
     project_source: 'horizontal',
     partner: '',

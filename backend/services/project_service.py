@@ -6,7 +6,7 @@
 from typing import List, Dict, Optional, Any
 from datetime import datetime, date
 from sqlalchemy import and_, or_, desc
-from ..models.database import db, Project, ProjectMember, ProgressRecord, User, ProjectStatus, ProjectMemberRole
+from ..models.database import db, Project, ProjectMember, ProgressRecord, User, ProjectStatus, ProjectMemberRole, ProjectModule, ModuleAssignment, ModuleWorkRecord
 
 class ProjectService:
     """项目服务类 - 处理项目相关的业务逻辑"""
@@ -23,6 +23,8 @@ class ProjectService:
             创建结果和项目信息
         """
         try:
+            project_source = project_data.get('project_source', 'horizontal')
+            
             # 创建项目对象
             project = Project(
                 name=project_data.get('name'),
@@ -31,9 +33,10 @@ class ProjectService:
                 end_date=datetime.strptime(project_data.get('end_date'), '%Y-%m-%d').date() if project_data.get('end_date') else None,
                 priority=project_data.get('priority', 1),
                 status=ProjectStatus(project_data.get('status', 'planning')),
-                project_source=project_data.get('project_source', 'horizontal'),  # 项目来源，默认横向
+                project_source=project_source,  # 项目来源，默认横向
                 partner=project_data.get('partner'),  # 合作方（可选）
-                amount=project_data.get('amount')  # 项目金额（可选）
+                amount=project_data.get('amount'),  # 项目金额（可选）
+                progress=0 if project_source == 'vertical' else project_data.get('progress', 0)  # 纵向项目进度固定为0
             )
             
             db.session.add(project)
@@ -310,7 +313,25 @@ class ProjectService:
             
             project_name = project.name
             
-            # 删除项目（级联删除会自动删除相关的成员、进度记录、模块等）
+            # 手动删除关联数据（避免外键约束错误）
+            # 1. 获取项目的所有模块
+            modules = ProjectModule.query.filter_by(project_id=project_id).all()
+            
+            # 2. 删除每个模块的关联数据
+            for module in modules:
+                # 删除模块分配记录
+                ModuleAssignment.query.filter_by(module_id=module.id).delete()
+                # 删除模块工作记录
+                ModuleWorkRecord.query.filter_by(module_id=module.id).delete()
+                # 删除模块进度记录会被级联删除（已配置cascade）
+            
+            # 3. 删除项目成员记录
+            ProjectMember.query.filter_by(project_id=project_id).delete()
+            
+            # 4. 删除项目进度记录
+            ProgressRecord.query.filter_by(project_id=project_id).delete()
+            
+            # 5. 删除项目本身（会级联删除模块）
             db.session.delete(project)
             db.session.commit()
             
@@ -346,6 +367,14 @@ class ProjectService:
                 return {
                     'success': False,
                     'message': '项目不存在',
+                    'data': None
+                }
+            
+            # 纵向项目不允许更新进度
+            if project.project_source == 'vertical':
+                return {
+                    'success': False,
+                    'message': '纵向项目没有进度概念，不允许更新进度',
                     'data': None
                 }
             

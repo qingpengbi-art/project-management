@@ -8,111 +8,75 @@
     class="edit-module-dialog"
   >
     <div v-if="module" class="edit-module-form">
-      <!-- 模块基本信息 -->
+      <!-- 模块基本信息编辑 -->
       <div class="module-info-section">
         <h4 class="section-title">模块信息</h4>
         
-        <div class="module-info-card">
-          <div class="module-header">
-            <div class="module-title">
-              <h3>{{ module.name }}</h3>
-              <div class="module-badges">
-                <el-tag 
-                  :type="getStatusTagType(module.status)" 
-                  size="small"
-                  effect="light"
-                >
-                  {{ getModuleStatusText(module.status) }}
-                </el-tag>
-                <el-tag 
-                  :type="getPriorityTagType(module.priority)" 
-                  size="small"
-                  effect="plain"
-                >
-                  {{ getPriorityText(module.priority) }}
-                </el-tag>
-              </div>
-            </div>
-            <div class="progress-circle">
-              <el-progress
-                type="circle"
-                :percentage="module.progress"
-                :width="60"
-                :stroke-width="6"
+        <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
+          <!-- 模块名称 -->
+          <el-form-item label="模块名称" prop="name">
+            <el-input 
+              v-model="form.name" 
+              placeholder="请输入模块名称"
+              maxlength="100"
+              show-word-limit
+            />
+          </el-form-item>
+          
+          <!-- 模块描述 -->
+          <el-form-item label="模块描述" prop="description">
+            <el-input 
+              v-model="form.description" 
+              type="textarea" 
+              :rows="3" 
+              placeholder="请输入模块描述"
+              maxlength="500"
+              show-word-limit
+            />
+          </el-form-item>
+          
+          <!-- 模块状态 -->
+          <el-form-item label="模块状态" prop="status">
+            <el-select v-model="form.status" placeholder="选择模块状态" style="width: 100%;">
+              <el-option label="未开始" value="not_started" />
+              <el-option label="进行中" value="in_progress" />
+              <el-option label="已完成" value="completed" />
+              <el-option label="暂停" value="paused" />
+            </el-select>
+          </el-form-item>
+          
+          <!-- 当前进度（只读显示） -->
+          <el-form-item label="当前进度">
+            <div class="progress-display">
+              <el-progress 
+                :percentage="module.progress" 
+                :stroke-width="20"
                 :color="getProgressColor(module.progress)"
               />
+              <span class="progress-tip">💡 进度修改请使用"更新进度"功能</span>
             </div>
-          </div>
+          </el-form-item>
           
-          <div class="module-description" v-if="module.description">
-            <p>{{ module.description }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 负责人管理 -->
-      <div class="assignee-section">
-        <h4 class="section-title">负责人</h4>
-        
-        <div class="assignee-content">
-          <!-- 当前负责人显示 -->
-          <div class="current-assignee" v-if="module.assigned_to">
-            <div class="user-card">
-              <div class="user-avatar">
-                {{ module.assigned_to.name.charAt(0) }}
-              </div>
-              <div class="user-details">
-                <div class="user-name">{{ module.assigned_to.name }}</div>
-                <div class="user-position">{{ module.assigned_to.position || '职位未设置' }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 负责人选择 -->
-          <div class="assignee-select">
-            <el-select
-              v-model="selectedLeaderId"
-              :placeholder="module.assigned_to ? '选择新负责人进行更换' : '选择负责人'"
-              clearable
-              filterable
+          <!-- 预计时间 -->
+          <el-form-item label="预计时间">
+            <el-date-picker
+              v-model="dateRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
               style="width: 100%;"
-            >
-              <!-- 如果有当前负责人，提供"移除负责人"选项 -->
-              <el-option
-                v-if="module.assigned_to"
-                label="移除负责人"
-                :value="-1"
-                style="color: #f56c6c;"
-              >
-                <div class="remove-option">
-                  <el-icon><Delete /></el-icon>
-                  <span>移除负责人</span>
-                </div>
-              </el-option>
-              
-              <el-option
-                v-for="user in availableUsers"
-                :key="user.id"
-                :label="`${user.name} - ${user.position || '职位未设置'}`"
-                :value="user.id"
-              >
-                <div class="user-option">
-                  <div class="user-avatar">{{ user.name.charAt(0) }}</div>
-                  <div class="user-info">
-                    <div class="user-name">{{ user.name }}</div>
-                    <div class="user-position">{{ user.position || '职位未设置' }}</div>
-                  </div>
-                </div>
-              </el-option>
-            </el-select>
-          </div>
-        </div>
+            />
+          </el-form-item>
+        </el-form>
       </div>
 
-      <!-- 团队成员管理 -->
+      <!-- 模块成员管理 -->
       <div class="members-section">
         <div class="members-header">
-          <h4 class="section-title">团队成员</h4>
+          <h4 class="section-title">模块成员</h4>
           <el-button
             type="primary"
             size="small"
@@ -255,7 +219,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   User, UserFilled, Plus, Delete 
@@ -290,34 +254,65 @@ const visible = computed({
   set: (value) => emit('update:modelValue', value)
 })
 
-const selectedLeaderId = ref(null)
+const formRef = ref(null)
 const selectedNewMember = ref(null)
 const showAddMember = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
 
+// 表单数据
+const form = reactive({
+  name: '',
+  description: '',
+  status: '',
+  start_date: '',
+  end_date: ''
+})
+
+// 日期范围
+const dateRange = ref([])
+
+// 表单验证规则
+const rules = {
+  name: [
+    { required: true, message: '请输入模块名称', trigger: 'blur' },
+    { min: 2, max: 100, message: '模块名称长度在 2 到 100 个字符', trigger: 'blur' }
+  ],
+  description: [
+    { max: 500, message: '模块描述不能超过 500 个字符', trigger: 'blur' }
+  ],
+  status: [
+    { required: true, message: '请选择模块状态', trigger: 'change' }
+  ]
+}
+
 // 模块成员数据
 const currentMembers = ref([])
 
 // 计算属性
-const availableUsers = computed(() => {
-  return userStore.users.filter(user => 
-    user.id !== props.module?.assigned_to?.id
-  )
-})
-
 const availableMembersToAdd = computed(() => {
   const existingMemberIds = currentMembers.value.map(m => m.user_id)
-  const leaderId = props.module?.assigned_to?.id
   
   return userStore.users.filter(user => 
-    !existingMemberIds.includes(user.id) && user.id !== leaderId
+    !existingMemberIds.includes(user.id)
   )
 })
 
 const hasChanges = computed(() => {
-  return selectedLeaderId.value !== null || 
-         currentMembers.value.some(m => m._isNew || m._isDeleted)
+  if (!props.module) return false
+  
+  // 检查基本信息是否有变化
+  const basicInfoChanged = 
+    form.name !== props.module.name ||
+    form.description !== (props.module.description || '') ||
+    form.status !== props.module.status ||
+    form.start_date !== (props.module.start_date || '') ||
+    form.end_date !== (props.module.end_date || '')
+  
+  // 检查成员是否有变化
+  const membersChanged = currentMembers.value.some(m => m._isNew || m._isDeleted)
+  
+  return basicInfoChanged || membersChanged
 })
 
 // 方法
@@ -331,16 +326,6 @@ const getModuleStatusText = (status) => {
   return statusMap[status] || status
 }
 
-const getPriorityText = (priority) => {
-  const priorityMap = {
-    1: '低',
-    2: '中',
-    3: '高',
-    4: '紧急'
-  }
-  return priorityMap[priority] || '未设置'
-}
-
 const getStatusTagType = (status) => {
   const statusTypeMap = {
     'not_started': '',
@@ -350,17 +335,6 @@ const getStatusTagType = (status) => {
   }
   return statusTypeMap[status] || ''
 }
-
-const getPriorityTagType = (priority) => {
-  const priorityTypeMap = {
-    1: 'info',
-    2: '',
-    3: 'warning',
-    4: 'danger'
-  }
-  return priorityTypeMap[priority] || ''
-}
-
 
 const getProgressColor = (progress) => {
   if (progress < 30) return '#f56c6c'
@@ -436,20 +410,41 @@ const handleSave = async () => {
     return
   }
 
+  // 验证表单
+  try {
+    await formRef.value.validate()
+  } catch (error) {
+    ElMessage.error('请检查表单填写是否正确')
+    return
+  }
+
   saving.value = true
 
   try {
     const updates = []
     
-    // 处理负责人更新
-    if (selectedLeaderId.value !== null) {
-      const assigneeId = selectedLeaderId.value === -1 ? null : selectedLeaderId.value
+    // 1. 更新模块基本信息
+    const basicInfoChanged = 
+      form.name !== props.module.name ||
+      form.description !== (props.module.description || '') ||
+      form.status !== props.module.status ||
+      form.start_date !== (props.module.start_date || '') ||
+      form.end_date !== (props.module.end_date || '')
+    
+    if (basicInfoChanged) {
+      const updateData = {
+        name: form.name,
+        description: form.description,
+        status: form.status,
+        start_date: form.start_date || null,
+        end_date: form.end_date || null
+      }
       updates.push(
-        moduleStore.updateModuleAssignee(props.module.id, assigneeId)
+        moduleApi.updateModule(props.module.id, updateData)
       )
     }
     
-    // 处理成员更新
+    // 2. 处理成员更新
     const memberUpdates = []
     
     // 添加新成员
@@ -471,12 +466,12 @@ const handleSave = async () => {
     // 执行所有更新
     await Promise.all([...updates, ...memberUpdates])
     
-    ElMessage.success('模块成员更新成功')
+    ElMessage.success('模块更新成功')
     emit('success')
     handleClose()
   } catch (error) {
     console.error('保存失败:', error)
-    ElMessage.error('保存失败，请重试')
+    ElMessage.error(error.message || '保存失败，请重试')
   } finally {
     saving.value = false
   }
@@ -520,7 +515,6 @@ const handleDelete = async () => {
 
 const handleClose = () => {
   // 重置所有状态
-  selectedLeaderId.value = null
   selectedNewMember.value = null
   showAddMember.value = false
   currentMembers.value = []
@@ -528,15 +522,48 @@ const handleClose = () => {
   visible.value = false
 }
 
+// 监听日期范围变化
+watch(dateRange, (newVal) => {
+  if (newVal && newVal.length === 2) {
+    form.start_date = newVal[0]
+    form.end_date = newVal[1]
+  } else {
+    form.start_date = ''
+    form.end_date = ''
+  }
+})
+
 // 监听对话框打开
 watch(() => props.modelValue, async (newVal) => {
-  if (newVal) {
+  if (newVal && props.module) {
+    // 初始化表单数据
+    Object.assign(form, {
+      name: props.module.name || '',
+      description: props.module.description || '',
+      status: props.module.status || 'not_started',
+      start_date: props.module.start_date || '',
+      end_date: props.module.end_date || ''
+    })
+    
+    // 初始化日期范围
+    if (props.module.start_date && props.module.end_date) {
+      dateRange.value = [props.module.start_date, props.module.end_date]
+    } else {
+      dateRange.value = []
+    }
+    
     // 确保有用户数据
     if (userStore.users.length === 0) {
       await userStore.fetchUsers()
     }
+    
     // 加载模块成员数据
     await loadModuleMembers()
+    
+    // 清除验证
+    nextTick(() => {
+      formRef.value?.clearValidate()
+    })
   }
 })
 </script>
@@ -553,13 +580,40 @@ watch(() => props.modelValue, async (newVal) => {
   }
   
   .module-info-section,
-  .assignee-section,
   .members-section {
     margin-bottom: 24px;
     
     &:last-child {
       margin-bottom: 0;
     }
+  }
+  
+  // 进度显示样式
+  .progress-display {
+    width: 100%;
+    
+    .el-progress {
+      margin-bottom: 8px;
+    }
+    
+    .progress-tip {
+      display: block;
+      font-size: 12px;
+      color: #909399;
+      font-style: italic;
+      margin-top: 4px;
+    }
+  }
+  
+  // 表单样式优化
+  :deep(.el-form-item__label) {
+    font-weight: 500;
+    color: #333;
+  }
+  
+  :deep(.el-textarea__inner),
+  :deep(.el-input__inner) {
+    border-radius: 6px;
   }
 
   // 模块信息卡片
@@ -602,66 +656,7 @@ watch(() => props.modelValue, async (newVal) => {
     }
   }
 
-  // 负责人管理
-  .assignee-content {
-    .current-assignee {
-      margin-bottom: 16px;
-      
-      .user-card {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 16px;
-        background: #f8fafc;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-        
-        .user-avatar {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: #409eff;
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 600;
-          font-size: 16px;
-        }
-        
-        .user-details {
-          flex: 1;
-          
-          .user-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-            font-size: 16px;
-          }
-          
-          .user-position {
-            font-size: 14px;
-            color: #666;
-          }
-        }
-      }
-    }
-    
-    .assignee-select {
-      .remove-option {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #f56c6c;
-        
-        .el-icon {
-          font-size: 14px;
-        }
-      }
-    }
-  }
-
-  // 团队成员管理
+  // 模块成员管理
   .members-header {
     display: flex;
     justify-content: space-between;

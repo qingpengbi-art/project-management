@@ -11,6 +11,7 @@ db = SQLAlchemy()
 
 class ProjectStatus(Enum):
     """项目状态枚举 - 业务流程状态"""
+    # 横向项目状态
     INITIAL_CONTACT = "initial_contact"        # 初步接触
     PROPOSAL_SUBMITTED = "proposal_submitted"   # 提交方案
     QUOTATION_SUBMITTED = "quotation_submitted" # 提交报价
@@ -21,6 +22,12 @@ class ProjectStatus(Enum):
     WARRANTY_PERIOD = "warranty_period"        # 维保期内
     POST_WARRANTY = "post_warranty"            # 维保期外
     NO_FOLLOW_UP = "no_follow_up"             # 不再跟进
+    
+    # 纵向项目专用状态
+    VERTICAL_DECLARATION = "vertical_declaration"     # 申报阶段
+    VERTICAL_REVIEW = "vertical_review"               # 审核阶段
+    VERTICAL_APPROVED = "vertical_approved"           # 审核通过
+    VERTICAL_REJECTED = "vertical_rejected"           # 审核未通过
 
 class ModuleStatus(Enum):
     """模块状态枚举"""

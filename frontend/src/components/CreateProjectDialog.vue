@@ -95,11 +95,11 @@
         </el-input>
       </el-form-item>
 
-      <!-- 合作方（仅横向项目显示） -->
-      <el-form-item v-if="form.project_source === 'horizontal'" label="合作方" prop="partner">
+      <!-- 合作方（横向和纵向项目显示） -->
+      <el-form-item v-if="form.project_source === 'horizontal' || form.project_source === 'vertical'" label="合作方" prop="partner">
         <el-input
           v-model="form.partner"
-          placeholder="请输入合作方名称"
+          placeholder="请输入合作方名称（选填）"
           maxlength="100"
           show-word-limit
         />
@@ -108,8 +108,8 @@
       <!-- 项目状态 - 根据项目类型动态显示 -->
       <el-form-item label="项目状态" prop="status">
         <el-select v-model="form.status" placeholder="选择项目状态" style="width: 100%">
-          <!-- 横向和纵向项目的状态 -->
-          <template v-if="form.project_source === 'horizontal' || form.project_source === 'vertical'">
+          <!-- 横向项目的状态 -->
+          <template v-if="form.project_source === 'horizontal'">
             <el-option label="初步接触" value="initial_contact" />
             <el-option label="提交方案" value="proposal_submitted" />
             <el-option label="提交报价" value="quotation_submitted" />
@@ -120,6 +120,13 @@
             <el-option label="维保期内" value="warranty_period" />
             <el-option label="维保期外" value="post_warranty" />
             <el-option label="不再跟进" value="no_follow_up" />
+          </template>
+          <!-- 纵向项目专用状态 -->
+          <template v-else-if="form.project_source === 'vertical'">
+            <el-option label="申报阶段" value="vertical_declaration" />
+            <el-option label="审核阶段" value="vertical_review" />
+            <el-option label="审核通过" value="vertical_approved" />
+            <el-option label="审核未通过" value="vertical_rejected" />
           </template>
           <!-- 自研项目的状态 -->
           <template v-else-if="form.project_source === 'self_developed'">
@@ -242,11 +249,16 @@ const handleProjectSourceChange = (source) => {
   if (source === 'self_developed') {
     // 自研项目默认为进行中
     form.value.status = 'project_implementation'
-    // 清空合作方
+    // 清空合作方（自研项目不需要合作方）
     form.value.partner = ''
+  } else if (source === 'vertical') {
+    // 纵向项目默认为申报阶段
+    form.value.status = 'vertical_declaration'
+    // 纵向项目可以有合作方，不清空
   } else {
-    // 横向/纵向项目默认为初步接触
+    // 横向项目默认为初步接触
     form.value.status = 'initial_contact'
+    // 横向项目可以有合作方，不清空
   }
 }
 

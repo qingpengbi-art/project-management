@@ -37,8 +37,8 @@
         </div>
       </div>
 
-      <!-- 项目进度 -->
-      <div class="progress-section apple-card">
+      <!-- 项目进度 - 只在横向和自研项目显示 -->
+      <div v-if="project.project_source !== 'vertical'" class="progress-section apple-card">
         <h3 class="section-title">项目进度</h3>
         <div class="progress-content">
           <div class="progress-display">
@@ -105,7 +105,6 @@
                   <span class="status-badge" :class="module.status">
                     {{ moduleStore.getStatusText(module.status) }}
                   </span>
-                  <div class="priority-indicator" :class="`priority-${module.priority}`"></div>
                 </div>
               </div>
             </div>
@@ -132,13 +131,19 @@
             </div>
             
             <div class="module-info">
-              <div class="info-row">
-                <span class="info-label">负责人:</span>
-                <span class="info-value">{{ module.assigned_to?.name || '未分配' }}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">优先级:</span>
-                <span class="info-value">{{ moduleStore.getPriorityText(module.priority) }}</span>
+              <div class="info-row members-row">
+                <span class="info-label">成员:</span>
+                <div class="members-list-inline">
+                  <span 
+                    v-if="module.assigned_users && module.assigned_users.length > 0"
+                    v-for="user in module.assigned_users"
+                    :key="user.id"
+                    class="member-tag"
+                  >
+                    {{ user.name }}
+                  </span>
+                  <span v-else class="no-members">未分配</span>
+                </div>
               </div>
               <div class="info-row">
                 <span class="info-label">更新时间:</span>
@@ -757,6 +762,56 @@ onMounted(() => {
 
 .module-info {
   margin-bottom: 16px;
+  
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    &.members-row {
+      align-items: flex-start;
+    }
+  }
+  
+  .info-label {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+  
+  .info-value {
+    color: var(--text-primary);
+    font-size: 14px;
+  }
+  
+  .members-list-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1;
+  }
+  
+  .member-tag {
+    padding: 2px 10px;
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--apple-blue);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  
+  .no-members {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-style: italic;
+  }
 }
 
 .module-actions {

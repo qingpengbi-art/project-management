@@ -41,6 +41,27 @@
                 <span class="date">{{ formatDateTime(record.updated_at) }}</span>
               </div>
             </div>
+            <!-- 部门主管操作按钮 -->
+            <div v-if="isDepartmentManager" class="record-actions">
+              <el-button 
+                size="small" 
+                type="primary" 
+                plain
+                @click="handleEdit(record)"
+                class="action-btn"
+              >
+                编辑
+              </el-button>
+              <el-button 
+                size="small" 
+                type="danger" 
+                plain
+                @click="handleDelete(record)"
+                class="action-btn"
+              >
+                删除
+              </el-button>
+            </div>
           </div>
           
           <!-- 记录内容 -->
@@ -106,19 +127,31 @@
       </span>
     </template>
   </el-dialog>
+  
+  <!-- 编辑工作记录对话框 -->
+  <EditWorkRecordDialog
+    v-model:visible="editDialogVisible"
+    :record="editingRecord"
+    @success="handleEditSuccess"
+  />
 </template>
 
 <script setup>
-import { ref, reactive, watch, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, watch, nextTick, computed } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   DocumentCopy, 
   Edit, 
   Trophy, 
   Warning, 
-  Calendar 
+  Calendar,
+  Delete
 } from '@element-plus/icons-vue'
 import { moduleApi } from '@/utils/api'
+import { useAuthStore } from '@/stores/auth'
+import EditWorkRecordDialog from './EditWorkRecordDialog.vue'
+
+const authStore = useAuthStore()
 
 const props = defineProps({
   visible: {
@@ -135,7 +168,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:visible'])
+const emit = defineEmits(['update:visible', 'recordUpdated'])
 
 // 响应式数据
 const dialogVisible = ref(false)
@@ -144,6 +177,13 @@ const loadingMore = ref(false)
 const workRecords = ref([])
 const hasMore = ref(true)
 const currentLimit = ref(10)
+const editDialogVisible = ref(false)
+const editingRecord = ref(null)
+
+// 计算属性 - 判断是否为部门主管
+const isDepartmentManager = computed(() => {
+  return authStore.user?.role === 'department_manager'
+})
 
 // 监听对话框显示状态
 watch(() => props.visible, (newVal) => {
@@ -239,6 +279,55 @@ const formatDateTime = (dateStr) => {
 const handleClose = () => {
   dialogVisible.value = false
 }
+
+// 编辑工作记录
+const handleEdit = (record) => {
+  editingRecord.value = record
+  editDialogVisible.value = true
+}
+
+// 删除工作记录
+const handleDelete = async (record) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除这条工作记录吗？（${record.week_label}）`,
+      '删除确认',
+      {
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        type: 'warning',
+        confirmButtonClass: 'el-button--danger'
+      }
+    )
+    
+    // 执行删除
+    const response = await moduleApi.deleteWorkRecord(record.id)
+    if (response.success) {
+      ElMessage.success('工作记录删除成功')
+      // 重新加载记录
+      await loadWorkRecords()
+      // 通知父组件刷新
+      emit('recordUpdated')
+    } else {
+      ElMessage.error(response.message || '删除失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除工作记录失败:', error)
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+// 处理编辑成功
+const handleEditSuccess = async () => {
+  editDialogVisible.value = false
+  ElMessage.success('工作记录更新成功')
+  // 重新加载记录
+  await loadWorkRecords()
+  // 通知父组件刷新
+  emit('recordUpdated')
+}
 </script>
 
 <style scoped>
@@ -290,9 +379,56 @@ const handleClose = () => {
 }
 
 .record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: var(--el-bg-color-page);
   padding: 12px 16px;
   border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.record-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* 按钮样式优化 - 参考Dashboard的按钮样式 */
+.action-btn {
+  font-weight: 500;
+  border: 1px solid;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Primary按钮 - 编辑 */
+.action-btn.el-button--primary.is-plain {
+  color: #409eff;
+  border-color: #409eff;
+  background-color: #ecf5ff;
+}
+
+.action-btn.el-button--primary.is-plain:hover {
+  color: #ffffff;
+  background-color: #409eff;
+  border-color: #409eff;
+}
+
+/* Danger按钮 - 删除 */
+.action-btn.el-button--danger.is-plain {
+  color: #f56c6c;
+  border-color: #f56c6c;
+  background-color: #fef0f0;
+}
+
+.action-btn.el-button--danger.is-plain:hover {
+  color: #ffffff;
+  background-color: #f56c6c;
+  border-color: #f56c6c;
 }
 
 .record-item.latest .record-header {

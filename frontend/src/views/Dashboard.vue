@@ -11,16 +11,6 @@
           <div class="card-info-section">
             <h3 class="card-title-large">横向项目</h3>
             <div class="card-number-display">{{ horizontalOverview.total }}</div>
-            <div class="card-progress-row">
-              <span class="progress-label-small">平均进度</span>
-              <span class="progress-value-small horizontal-color">{{ horizontalOverview.avgProgress }}%</span>
-            </div>
-            <div class="progress-bar-slim">
-              <div 
-                class="progress-fill-slim horizontal-fill"
-                :style="{ width: horizontalOverview.avgProgress + '%' }"
-              ></div>
-            </div>
           </div>
           
           <!-- 下半部分：状态区 -->
@@ -49,25 +39,15 @@
           <div class="card-info-section">
             <h3 class="card-title-large">纵向项目</h3>
             <div class="card-number-display">{{ verticalOverview.total }}</div>
-            <div class="card-progress-row">
-              <span class="progress-label-small">平均进度</span>
-              <span class="progress-value-small vertical-color">{{ verticalOverview.avgProgress }}%</span>
-            </div>
-            <div class="progress-bar-slim">
-              <div 
-                class="progress-fill-slim vertical-fill"
-                :style="{ width: verticalOverview.avgProgress + '%' }"
-              ></div>
-            </div>
           </div>
           
-          <!-- 下半部分：状态区 -->
+          <!-- 下半部分：状态区 - 使用纵向专用状态 -->
           <div class="card-status-section">
-            <div class="status-grid-uniform">
+            <div class="status-grid-vertical">
               <div 
-                v-for="status in orderedStatusList" 
+                v-for="status in verticalStatusList" 
                 :key="status"
-                class="status-item-uniform"
+                class="status-item-vertical"
                 :class="{ 'active': (verticalOverview.statusDist[status] || 0) > 0 }"
                 @click="navigateToProjectsBySource('vertical', status)"
               >
@@ -87,16 +67,6 @@
           <div class="card-info-section">
             <h3 class="card-title-large">自研项目</h3>
             <div class="card-number-display">{{ selfDevelopedOverview.total }}</div>
-            <div class="card-progress-row">
-              <span class="progress-label-small">平均进度</span>
-              <span class="progress-value-small self-color">{{ selfDevelopedOverview.avgProgress }}%</span>
-            </div>
-            <div class="progress-bar-slim">
-              <div 
-                class="progress-fill-slim self-fill"
-                :style="{ width: selfDevelopedOverview.avgProgress + '%' }"
-              ></div>
-            </div>
           </div>
           
           <!-- 下半部分：状态区（两个大卡片） -->
@@ -179,14 +149,16 @@
                       </div>
                     </div>
                     <div class="module-assignees">
-                      <div class="assignees-label">负责人:</div>
+                      <div class="assignees-label">成员:</div>
                       <div class="assignees-list">
                         <div
-                          v-if="module.assigned_to"
+                          v-if="module.assigned_users && module.assigned_users.length > 0"
+                          v-for="user in module.assigned_users"
+                          :key="user.id"
                           class="assignee-tag"
-                          :title="`${module.assigned_to.name} - ${module.assigned_to.position}`"
+                          :title="`${user.name} - ${user.position || ''}`"
                         >
-                          {{ module.assigned_to.name }}
+                          {{ user.name }}
                         </div>
                         <div v-else class="no-assignee">
                           未分配
@@ -197,7 +169,6 @@
                     <div class="module-progress">
                       <div class="progress-info">
                         <span class="progress-text">{{ module.progress }}%</span>
-                        <span class="priority">优先级: {{ getPriorityText(module.priority) }}</span>
                       </div>
                       <div class="progress-bar">
                         <div 
@@ -281,20 +252,20 @@
             </template>
           </el-table-column>
           
-          <!-- 合作方 -->
+          <!-- 合作方（横向和纵向项目显示） -->
           <el-table-column prop="partner" label="合作方" width="150" align="center" header-align="center">
             <template #default="{ row }">
-              <span v-if="row.project_source === 'horizontal' && row.partner" class="partner-text">
+              <span v-if="(row.project_source === 'horizontal' || row.project_source === 'vertical') && row.partner" class="partner-text">
                 {{ row.partner }}
               </span>
               <span v-else class="no-partner">-</span>
             </template>
           </el-table-column>
           
-          <!-- 项目进度 -->
+          <!-- 项目进度（纵向项目不显示） -->
           <el-table-column prop="progress" label="项目进度" width="150" align="center" header-align="center">
             <template #default="{ row }">
-              <div class="progress-cell">
+              <div v-if="row.project_source !== 'vertical'" class="progress-cell">
                 <div class="progress-bar">
                   <div 
                     class="progress-fill"
@@ -304,6 +275,7 @@
                 </div>
                 <span class="progress-text">{{ row.progress }}%</span>
               </div>
+              <span v-else class="no-progress">-</span>
             </template>
           </el-table-column>
           
@@ -453,7 +425,7 @@ const statusTooltipVisible = ref(false)
 const statusTooltipContent = ref('')
 const statusTooltipPosition = ref({ x: 0, y: 0 })
 
-// 按业务流程顺序排列的状态列表
+// 横向项目按业务流程顺序排列的状态列表
 const orderedStatusList = [
   'initial_contact',      // 初步接触
   'proposal_submitted',   // 提交方案
@@ -465,6 +437,14 @@ const orderedStatusList = [
   'warranty_period',      // 维保期内
   'post_warranty',        // 维保期外
   'no_follow_up'          // 不再跟进
+]
+
+// 纵向项目专用状态列表
+const verticalStatusList = [
+  'vertical_declaration', // 申报阶段
+  'vertical_review',      // 审核阶段
+  'vertical_approved',    // 审核通过
+  'vertical_rejected'     // 审核未通过
 ]
 
 // 计算属性
@@ -490,17 +470,15 @@ const horizontalOverview = computed(() => {
   }
 })
 
-// 纵向项目统计
+// 纵向项目统计 - 使用纵向专用状态
 const verticalOverview = computed(() => {
   const projects = overview.value.projects.filter(p => p.project_source === 'vertical')
   const statusDist = {}
-  orderedStatusList.forEach(status => {
+  verticalStatusList.forEach(status => {
     statusDist[status] = projects.filter(p => p.status === status).length
   })
-  const totalProgress = projects.reduce((sum, p) => sum + (p.progress || 0), 0)
   return {
     total: projects.length,
-    avgProgress: projects.length > 0 ? Math.round(totalProgress / projects.length) : 0,
     statusDist
   }
 })
@@ -756,8 +734,24 @@ const fetchModulesData = async () => {
     modulesLoading.value = true
     const response = await moduleApi.getModulesOverview()
     if (response.success) {
-      // 按照业务流程顺序对项目进行排序
+      // 定义项目来源的优先级顺序：横向 → 纵向 → 自研
+      const sourceOrder = {
+        'horizontal': 1,
+        'vertical': 2,
+        'self_developed': 3
+      }
+      
+      // 先按项目来源排序，再按状态排序
       const sortedProjects = response.data.sort((a, b) => {
+        // 获取项目来源（默认为横向）
+        const aSource = a.project_source || 'horizontal'
+        const bSource = b.project_source || 'horizontal'
+        
+        // 先按项目来源排序
+        const sourceCompare = (sourceOrder[aSource] || 99) - (sourceOrder[bSource] || 99)
+        if (sourceCompare !== 0) return sourceCompare
+        
+        // 相同来源的项目，按状态排序
         const aIndex = orderedStatusList.indexOf(a.status)
         const bIndex = orderedStatusList.indexOf(b.status)
         
@@ -833,11 +827,14 @@ const exportToExcel = async () => {
   
   // 添加项目详细数据
   projectsWithModules.value.forEach(project => {
+    // 纵向项目不显示进度
+    const progressDisplay = project.project_source === 'vertical' ? '-' : `${project.progress}%`
+    
     // 项目基本信息
     exportData.push({
       '项目名称': project.name,
       '状态': getStatusText(project.status),
-      '进度': `${project.progress}%`,
+      '进度': progressDisplay,
       '负责人': project.leader?.name || '未指定',
       '模块名称': '=== 项目模块 ===',
       '模块状态': '',
@@ -1038,6 +1035,7 @@ const getStatusColor = (status) => {
 
 const getStatusShortText = (status) => {
   const shortTextMap = {
+    // 横向项目状态
     'initial_contact': '初步接触',
     'proposal_submitted': '提交方案',
     'quotation_submitted': '提交报价',
@@ -1047,7 +1045,12 @@ const getStatusShortText = (status) => {
     'project_acceptance': '项目验收',
     'warranty_period': '维保期内',
     'post_warranty': '维保期外',
-    'no_follow_up': '不再跟进'
+    'no_follow_up': '不再跟进',
+    // 纵向项目专用状态
+    'vertical_declaration': '申报阶段',
+    'vertical_review': '审核阶段',
+    'vertical_approved': '审核通过',
+    'vertical_rejected': '审核未通过'
   }
   return shortTextMap[status] || status
 }
@@ -1151,11 +1154,32 @@ onMounted(() => {
   align-items: stretch;
 }
 
-// 三卡片横向布局
+// 三卡片横向布局 - 从左到右：横向(50%) 纵向(25%) 自研(25%)
 .overview-section.three-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 2fr 1fr 1fr; // 横向(50%) 纵向(25%) 自研(25%)
+  grid-template-areas: "horizontal vertical self";
   gap: 20px;
+  align-items: stretch; // 高度拉伸对齐
+  
+  // 确保每个卡片宽度完全一致
+  > .project-source-card {
+    min-width: 0; // 防止内容撑开
+    width: 100%; // 填满grid单元格
+  }
+  
+  // 指定卡片位置
+  > .horizontal-card {
+    grid-area: horizontal;
+  }
+  
+  > .vertical-card {
+    grid-area: vertical;
+  }
+  
+  > .self-card {
+    grid-area: self;
+  }
 }
 
 // 左侧统计卡片容器 - 单列布局
@@ -1219,6 +1243,7 @@ onMounted(() => {
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box; // 确保padding不影响总宽度
   
   &:hover {
     transform: translateY(-4px);
@@ -1270,6 +1295,8 @@ onMounted(() => {
   padding: 24px 24px 20px;
   background: white;
   text-align: center;
+  width: 100%; // 确保宽度一致
+  box-sizing: border-box; // padding不影响总宽度
 }
 
 .card-title-large {
@@ -1350,23 +1377,43 @@ onMounted(() => {
 .card-status-section {
   background: var(--theme-lighter);
   padding: 16px 20px 20px;
-  min-height: 140px;
+  height: 200px; // 固定高度，让所有卡片的状态区域严格一致
+  width: 100%; // 确保宽度一致
+  box-sizing: border-box; // padding不影响总宽度
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; // 从上开始排列，不居中
 }
 
+// 横向项目状态网格 - 5x2布局，更好地利用宽度
 .status-grid-uniform {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(5, 1fr); // 每行5个，共2行
+  gap: 8px; // 增加间距，因为横向卡片更宽了
 }
 
+// 纵向项目专用网格布局（2x2）- 与横向项目间距保持一致
+.status-grid-vertical {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px; // 与横向项目保持一致
+  height: 100%; // 填满容器
+  align-content: start; // 从顶部开始
+}
+
+// 横向项目状态项 - 优化字体大小，更易阅读
 .status-item-uniform {
-  padding: 10px 4px;
+  padding: 12px 6px; // 增加padding，让内容更舒展
   background: white;
   border-radius: 6px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 70px; // 保证高度一致
   
   &.active {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -1378,7 +1425,7 @@ onMounted(() => {
     &:hover {
       border-color: var(--theme-color);
       transform: translateY(-2px);
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
   }
   
@@ -1397,41 +1444,91 @@ onMounted(() => {
   }
 }
 
+// 纵向项目状态项样式（2x2布局）- 与横向项目方框大小完全一致
+.status-item-vertical {
+  padding: 12px 6px; // 与横向项目保持一致
+  background: white;
+  border-radius: 6px; // 与横向项目保持一致
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 70px; // 与横向项目保持一致
+  
+  &.active {
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    
+    .status-count-uniform {
+      color: var(--theme-color);
+    }
+    
+    &:hover {
+      border-color: var(--theme-color);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  }
+  
+  &:not(.active) {
+    background: rgba(255, 255, 255, 0.4);
+    opacity: 0.45;
+    cursor: not-allowed;
+    
+    &:hover {
+      transform: none;
+    }
+    
+    .status-count-uniform {
+      color: #C7C7CC !important;
+    }
+  }
+}
+
+// 统一的状态数字和标签样式 - 适用于所有卡片
 .status-count-uniform {
-  font-size: 18px;
+  font-size: 22px; // 统一增大到22px，更清晰易读
   font-weight: 800;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
   line-height: 1;
 }
 
 .status-label-uniform {
-  font-size: 10px;
+  font-size: 12px; // 统一增大到12px，更清晰易读
   color: var(--text-secondary);
   font-weight: 600;
   line-height: 1.2;
 }
 
-// 自研项目特殊布局（两个大卡片，紧凑居中）
+// 自研项目特殊布局（一列两行）- 与横向项目间距保持一致
 .self-status-grid-two {
   display: flex;
-  gap: 12px;
-  justify-content: center;
-  align-items: stretch;
+  flex-direction: column; // 垂直排列
+  gap: 8px; // 与横向项目保持一致
+  justify-content: flex-start; // 从顶部开始
+  align-items: stretch; // 宽度拉伸
+  height: 100%; // 填满容器
 }
 
 .self-status-item-large {
-  flex: 0 0 calc(50% - 6px);
-  max-width: 180px;
-  padding: 24px 16px;
-  background: white;
-  border-radius: 10px;
+  flex: 1; // 垂直方向平分空间
+  padding: 12px 6px; // 与横向项目保持一致的padding
+  background: white; // 白色方框背景
+  border-radius: 6px; // 与横向项目保持一致的圆角
   text-align: center;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 70px; // 与横向项目状态项高度保持一致
   
   &.active {
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.06);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
     
     .self-status-count {
       color: var(--theme-color);
@@ -1439,8 +1536,8 @@ onMounted(() => {
     
     &:hover {
       border-color: var(--theme-color);
-      transform: translateY(-2px) scale(1.03);
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06), 0 6px 16px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
   }
   
@@ -1460,17 +1557,17 @@ onMounted(() => {
 }
 
 .self-status-count {
-  font-size: 36px;
+  font-size: 22px; // 与其他卡片统一的字体大小
   font-weight: 800;
   line-height: 1;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .self-status-label {
-  font-size: 13px;
+  font-size: 12px; // 与其他卡片统一的字体大小
   color: var(--text-secondary);
   font-weight: 600;
-  letter-spacing: 0.3px;
+  line-height: 1.2;
 }
 
 .progress-chart-card {

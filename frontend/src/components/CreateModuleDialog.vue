@@ -21,16 +21,6 @@
         />
       </el-form-item>
       
-      <!-- 模块优先级 -->
-      <el-form-item label="优先级" prop="priority">
-        <el-select v-model="form.priority" placeholder="选择优先级" style="width: 100%;">
-          <el-option label="低" :value="1" />
-          <el-option label="中" :value="2" />
-          <el-option label="高" :value="3" />
-          <el-option label="紧急" :value="4" />
-        </el-select>
-      </el-form-item>
-      
       <!-- 模块状态 -->
       <el-form-item label="模块状态" prop="status">
         <el-select v-model="form.status" placeholder="选择模块状态" style="width: 100%;">
@@ -51,18 +41,18 @@
         />
       </el-form-item>
       
-      <!-- 模块负责人 -->
-      <el-form-item label="负责人">
+      <!-- 模块成员 -->
+      <el-form-item label="模块成员">
         <div class="assignee-section">
           <div class="assignee-list">
             <div 
-              v-for="(assignee, index) in form.assignees" 
+              v-for="(member, index) in form.members" 
               :key="index"
               class="assignee-item"
             >
               <el-select 
-                v-model="assignee.user_id" 
-                placeholder="选择负责人" 
+                v-model="member.user_id" 
+                placeholder="选择成员" 
                 style="flex: 1; margin-right: 8px;"
                 filterable
               >
@@ -74,21 +64,12 @@
                 />
               </el-select>
               
-              <el-select 
-                v-model="assignee.role" 
-                placeholder="角色" 
-                style="width: 120px; margin-right: 8px;"
-              >
-                <el-option label="负责人" value="leader" />
-                <el-option label="成员" value="member" />
-              </el-select>
-              
               <el-button 
                 type="danger" 
                 size="small" 
                 icon="Delete"
-                @click="removeAssignee(index)"
-                :disabled="form.assignees.length <= 1"
+                @click="removeMember(index)"
+                :disabled="form.members.length <= 1"
               />
             </div>
           </div>
@@ -97,10 +78,10 @@
             type="primary" 
             size="small" 
             icon="Plus"
-            @click="addAssignee"
+            @click="addMember"
             style="margin-top: 8px;"
           >
-            添加负责人
+            添加成员
           </el-button>
         </div>
       </el-form-item>
@@ -159,13 +140,13 @@ const availableUsers = ref([])
 const form = reactive({
   name: '',
   description: '',
-  priority: 2,
+  priority: 2, // 保留但不显示，默认中等优先级
   status: 'not_started',
   progress: 0,
   start_date: '',
   end_date: '',
-  assignees: [
-    { user_id: '', role: 'leader' }
+  members: [
+    { user_id: '' } // 简化为只有user_id
   ]
 })
 
@@ -180,9 +161,6 @@ const rules = {
   ],
   description: [
     { max: 500, message: '模块描述不能超过 500 个字符', trigger: 'blur' }
-  ],
-  priority: [
-    { required: true, message: '请选择优先级', trigger: 'change' }
   ],
   status: [
     { required: true, message: '请选择模块状态', trigger: 'change' }
@@ -267,12 +245,12 @@ const resetForm = () => {
   Object.assign(form, {
     name: '',
     description: '',
-    priority: 2,
+    priority: 2, // 默认中等优先级
     status: 'not_started',
     progress: 0,
     start_date: '',
     end_date: '',
-    assignees: [{ user_id: '', role: 'leader' }]
+    members: [{ user_id: '' }]
   })
   dateRange.value = []
   
@@ -281,15 +259,15 @@ const resetForm = () => {
   })
 }
 
-// 添加负责人
-const addAssignee = () => {
-  form.assignees.push({ user_id: '', role: 'member' })
+// 添加成员
+const addMember = () => {
+  form.members.push({ user_id: '' })
 }
 
-// 移除负责人
-const removeAssignee = (index) => {
-  if (form.assignees.length > 1) {
-    form.assignees.splice(index, 1)
+// 移除成员
+const removeMember = (index) => {
+  if (form.members.length > 1) {
+    form.members.splice(index, 1)
   }
 }
 
@@ -300,11 +278,11 @@ const submitForm = async () => {
     
     loading.value = true
     
-    // 过滤掉没有选择用户的负责人
-    const validAssignees = form.assignees.filter(assignee => assignee.user_id)
+    // 过滤掉没有选择用户的成员
+    const validMembers = form.members.filter(member => member.user_id)
     
-    if (validAssignees.length === 0) {
-      ElMessage.warning('请至少选择一个负责人')
+    if (validMembers.length === 0) {
+      ElMessage.warning('请至少选择一个成员')
       loading.value = false
       return
     }
@@ -312,12 +290,12 @@ const submitForm = async () => {
     const submitData = {
       name: form.name,
       description: form.description,
-      priority: form.priority,
+      priority: form.priority, // 保留优先级字段，默认值2
       status: form.status,
       progress: form.progress,
       start_date: form.start_date || null,
       end_date: form.end_date || null,
-      assigned_users: validAssignees.map(a => a.user_id) // 转换为用户ID数组
+      assigned_users: validMembers.map(m => m.user_id) // 转换为用户ID数组
     }
     
     const response = await moduleApi.createModule(props.projectId, submitData)
@@ -325,14 +303,14 @@ const submitForm = async () => {
     if (response.success) {
       ElMessage.success(response.message || '模块创建成功')
       
-      // 如果有负责人，分配给模块
-      if (validAssignees.length > 0 && response.data?.id) {
+      // 如果有成员，分配给模块
+      if (validMembers.length > 0 && response.data?.id) {
         try {
-          await moduleApi.assignUsersToModule(response.data.id, validAssignees.map(a => a.user_id))
+          await moduleApi.assignUsersToModule(response.data.id, validMembers.map(m => m.user_id))
         } catch (assignError) {
-          console.error('分配负责人失败:', assignError)
+          console.error('分配成员失败:', assignError)
           // 不阻塞主流程，只是警告
-          ElMessage.warning('模块创建成功，但分配负责人失败')
+          ElMessage.warning('模块创建成功，但分配成员失败')
         }
       }
       

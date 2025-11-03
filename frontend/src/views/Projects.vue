@@ -127,8 +127,8 @@
             <p>{{ project.description || '暂无描述' }}</p>
           </div>
 
-          <!-- 项目进度 -->
-          <div class="project-progress">
+          <!-- 项目进度 - 纵向项目不显示 -->
+          <div v-if="project.project_source !== 'vertical'" class="project-progress">
             <div class="progress-header">
               <span class="progress-label">进度</span>
             </div>

@@ -4,7 +4,7 @@
 """
 
 from typing import List, Dict, Optional, Any
-from ..models.database import db, User, ProjectMember, Project, UserRole, ProjectMemberRole
+from ..models.database import db, User, ProjectMember, Project, UserRole, ProjectMemberRole, ModuleAssignment, ProjectModule
 from .auth_service import AuthService
 
 class UserService:
@@ -90,11 +90,24 @@ class UserService:
             for user in users:
                 user_dict = user.to_dict()
                 
-                # 添加参与项目数量
-                project_count = ProjectMember.query.filter_by(user_id=user.id).count()
+                # 统计参与项目数量：通过模块参与统计
+                # 1. 找到用户参与的所有模块
+                module_assignments = ModuleAssignment.query.filter_by(user_id=user.id).all()
+                module_ids = [assignment.module_id for assignment in module_assignments]
+                
+                # 2. 找到这些模块对应的项目（去重）
+                if module_ids:
+                    project_ids = db.session.query(ProjectModule.project_id)\
+                        .filter(ProjectModule.id.in_(module_ids))\
+                        .distinct()\
+                        .all()
+                    project_count = len(project_ids)
+                else:
+                    project_count = 0
+                
                 user_dict['project_count'] = project_count
                 
-                # 添加负责项目数量
+                # 统计负责项目数量：通过ProjectMember表中的LEADER角色
                 leader_count = ProjectMember.query.filter_by(
                     user_id=user.id, 
                     role=ProjectMemberRole.LEADER
@@ -402,12 +415,33 @@ class UserService:
                     'data': None
                 }
             
-            # 检查用户是否还参与项目
-            project_count = ProjectMember.query.filter_by(user_id=user_id).count()
-            if project_count > 0:
+            # 检查用户是否还参与模块（即参与项目）
+            module_assignment_count = ModuleAssignment.query.filter_by(user_id=user_id).count()
+            if module_assignment_count > 0:
+                # 统计参与的项目数量用于提示
+                module_assignments = ModuleAssignment.query.filter_by(user_id=user_id).all()
+                module_ids = [assignment.module_id for assignment in module_assignments]
+                if module_ids:
+                    project_ids = db.session.query(ProjectModule.project_id)\
+                        .filter(ProjectModule.id.in_(module_ids))\
+                        .distinct()\
+                        .all()
+                    project_count = len(project_ids)
+                else:
+                    project_count = 0
+                    
                 return {
                     'success': False,
-                    'message': f'用户还参与 {project_count} 个项目，无法删除。请先从所有项目中移除该用户。',
+                    'message': f'用户还参与 {project_count} 个项目的 {module_assignment_count} 个模块，无法删除。请先从所有模块中移除该用户。',
+                    'data': None
+                }
+            
+            # 检查用户是否是项目负责人
+            leader_count = ProjectMember.query.filter_by(user_id=user_id, role=ProjectMemberRole.LEADER).count()
+            if leader_count > 0:
+                return {
+                    'success': False,
+                    'message': f'用户还负责 {leader_count} 个项目，无法删除。请先更换项目负责人。',
                     'data': None
                 }
             

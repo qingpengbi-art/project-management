@@ -75,31 +75,31 @@
           </div>
         </el-form-item>
 
-        <!-- 工作内容 -->
+        <!-- 工作内容（可选） -->
         <el-form-item label="工作内容" prop="workContent">
           <el-input
             v-model="form.workContent"
             type="textarea"
             :rows="3"
-            placeholder="请描述本周具体完成的工作内容..."
+            placeholder="请描述本周具体完成的工作内容（可选）..."
             maxlength="500"
             show-word-limit
           />
         </el-form-item>
 
-        <!-- 工作成果 -->
+        <!-- 工作成果（可选） -->
         <el-form-item label="工作成果" prop="achievements">
           <el-input
             v-model="form.achievements"
             type="textarea"
             :rows="2"
-            placeholder="请描述取得的成果和收获..."
+            placeholder="请描述取得的成果和收获（可选）..."
             maxlength="300"
             show-word-limit
           />
         </el-form-item>
 
-        <!-- 遇到的问题 -->
+        <!-- 遇到的问题（可选） -->
         <el-form-item label="遇到问题" prop="issues">
           <el-input
             v-model="form.issues"
@@ -111,25 +111,25 @@
           />
         </el-form-item>
 
-        <!-- 下周计划 -->
+        <!-- 下周计划（可选） -->
         <el-form-item label="下周计划" prop="nextWeekPlan">
           <el-input
             v-model="form.nextWeekPlan"
             type="textarea"
             :rows="2"
-            placeholder="请描述下周的工作计划..."
+            placeholder="请描述下周的工作计划（可选）..."
             maxlength="300"
             show-word-limit
           />
         </el-form-item>
 
-        <!-- 更新说明 -->
+        <!-- 更新说明（可选） -->
         <el-form-item label="更新说明" prop="notes">
           <el-input
             v-model="form.notes"
             type="textarea"
             :rows="2"
-            placeholder="请简要说明本次进度更新的原因..."
+            placeholder="请简要说明本次进度更新的原因（可选）..."
             maxlength="200"
             show-word-limit
           />
@@ -200,20 +200,8 @@ const rules = {
   progress: [
     { required: true, message: '请设置进度', trigger: 'blur' },
     { type: 'number', min: 0, max: 100, message: '进度必须在0-100之间', trigger: 'blur' }
-  ],
-  workContent: [
-    { required: true, message: '请填写工作内容', trigger: 'blur' },
-    { min: 10, message: '工作内容至少10个字符', trigger: 'blur' }
-  ],
-  achievements: [
-    { required: true, message: '请填写工作成果', trigger: 'blur' }
-  ],
-  nextWeekPlan: [
-    { required: true, message: '请填写下周计划', trigger: 'blur' }
-  ],
-  notes: [
-    { required: true, message: '请填写更新说明', trigger: 'blur' }
   ]
+  // 所有文本字段改为非必填：workContent、achievements、nextWeekPlan、notes
 }
 
 // 计算属性

@@ -71,6 +71,47 @@ def get_module_detail(module_id):
             'data': None
         }), 500
 
+@module_bp.route('/<int:module_id>', methods=['PUT'])
+@login_required
+def update_module(module_id):
+    """更新模块基本信息"""
+    try:
+        # 权限检查
+        current_user = request.current_user
+        from ..services.auth_service import AuthService
+        
+        # 检查用户是否有权限更新此模块
+        if current_user.role != UserRole.DEPARTMENT_MANAGER:
+            # 普通成员需要检查模块权限
+            if not AuthService.has_module_permission(current_user, module_id, 'update_module'):
+                return jsonify({
+                    'success': False,
+                    'message': '没有权限更新此模块'
+                }), 403
+        
+        data = request.get_json()
+        
+        # 验证必填字段
+        if 'name' in data and not data['name']:
+            return jsonify({
+                'success': False,
+                'message': '模块名称不能为空'
+            }), 400
+        
+        result = ModuleService.update_module(module_id, data)
+        
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'更新模块时发生错误: {str(e)}',
+            'data': None
+        }), 500
+
 @module_bp.route('/<int:module_id>/progress', methods=['PUT'])
 @login_required
 def update_module_progress(module_id):
@@ -223,8 +264,8 @@ def add_work_record(module_id):
     try:
         data = request.get_json()
         
-        # 验证必填字段
-        required_fields = ['week_start', 'week_end', 'work_content', 'created_by_id']
+        # 验证必填字段 (work_content已改为非必填)
+        required_fields = ['week_start', 'week_end', 'created_by_id']
         for field in required_fields:
             if not data or not data.get(field):
                 return jsonify({
@@ -273,6 +314,72 @@ def get_latest_work_content(module_id):
         return jsonify({
             'success': False,
             'message': f'获取最新工作内容时发生错误: {str(e)}',
+            'data': None
+        }), 500
+
+@module_bp.route('/work-records/<int:record_id>', methods=['PUT'])
+@login_required
+def update_work_record(record_id):
+    """更新工作记录（部门主管专用）"""
+    try:
+        # 权限检查 - 只有部门主管可以编辑工作记录
+        current_user = request.current_user
+        if current_user.role != UserRole.DEPARTMENT_MANAGER:
+            return jsonify({
+                'success': False,
+                'message': '只有部门主管可以编辑工作记录'
+            }), 403
+        
+        data = request.get_json()
+        
+        # 验证必填字段
+        required_fields = ['week_start', 'week_end']
+        for field in required_fields:
+            if not data or not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'message': f'{field} 不能为空',
+                    'data': None
+                }), 400
+        
+        result = ModuleService.update_work_record(record_id, data)
+        
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'更新工作记录时发生错误: {str(e)}',
+            'data': None
+        }), 500
+
+@module_bp.route('/work-records/<int:record_id>', methods=['DELETE'])
+@login_required
+def delete_work_record(record_id):
+    """删除工作记录（部门主管专用）"""
+    try:
+        # 权限检查 - 只有部门主管可以删除工作记录
+        current_user = request.current_user
+        if current_user.role != UserRole.DEPARTMENT_MANAGER:
+            return jsonify({
+                'success': False,
+                'message': '只有部门主管可以删除工作记录'
+            }), 403
+        
+        result = ModuleService.delete_work_record(record_id)
+        
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'删除工作记录时发生错误: {str(e)}',
             'data': None
         }), 500
 

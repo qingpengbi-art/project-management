@@ -179,6 +179,7 @@ export const useProjectStore = defineStore('project', () => {
 
   const getStatusText = (status) => {
     const statusMap = {
+      // 横向项目状态
       'initial_contact': '初步接触',
       'proposal_submitted': '提交方案',
       'quotation_submitted': '提交报价',
@@ -188,13 +189,19 @@ export const useProjectStore = defineStore('project', () => {
       'project_acceptance': '项目验收',
       'warranty_period': '维保期内',
       'post_warranty': '维保期外',
-      'no_follow_up': '不再跟进'
+      'no_follow_up': '不再跟进',
+      // 纵向项目专用状态
+      'vertical_declaration': '申报阶段',
+      'vertical_review': '审核阶段',
+      'vertical_approved': '审核通过',
+      'vertical_rejected': '审核未通过'
     }
     return statusMap[status] || status
   }
 
   const getStatusColor = (status) => {
     const colorMap = {
+      // 横向项目状态颜色
       'initial_contact': '#8E8E93',        // 浅灰色 - 初步接触
       'proposal_submitted': '#5AC8FA',     // 天蓝色 - 提交方案
       'quotation_submitted': '#007AFF',    // 蓝色 - 提交报价
@@ -204,7 +211,12 @@ export const useProjectStore = defineStore('project', () => {
       'project_acceptance': '#32D74B',     // 深绿色 - 项目验收
       'warranty_period': '#FFD60A',        // 黄色 - 维保期内
       'post_warranty': '#A2845E',          // 棕色 - 维保期外
-      'no_follow_up': '#FF3B30'            // 红色 - 不再跟进
+      'no_follow_up': '#FF3B30',           // 红色 - 不再跟进
+      // 纵向项目状态颜色
+      'vertical_declaration': '#5AC8FA',   // 天蓝色 - 申报阶段
+      'vertical_review': '#FF9500',        // 橙色 - 审核阶段
+      'vertical_approved': '#34C759',      // 绿色 - 审核通过
+      'vertical_rejected': '#FF3B30'       // 红色 - 审核未通过
     }
     return colorMap[status] || '#8e8e93'
   }
