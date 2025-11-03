@@ -1,0 +1,1042 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "高吉敏",
+      "username": "gaojimin",
+      "password_hash": "scrypt:32768:8:1$GMgpmdYxYwRQCUlw$2d0a181da9529f8dd0e9c9cdc61dc5bc43f9e4033bc01d72f8d2aca07aa0711eaa735424253b4dbae2afade49be8327c11f485dfef908c008b597839b41e321d",
+      "email": null,
+      "position": "部门主管",
+      "role": "department_manager",
+      "created_at": "2025-09-21T02:20:21"
+    },
+    {
+      "id": 2,
+      "name": "杨继同",
+      "username": "yangjitong",
+      "password_hash": "scrypt:32768:8:1$GMgpmdYxYwRQCUlw$2d0a181da9529f8dd0e9c9cdc61dc5bc43f9e4033bc01d72f8d2aca07aa0711eaa735424253b4dbae2afade49be8327c11f485dfef908c008b597839b41e321d",
+      "email": null,
+      "position": "电气工程师",
+      "role": "member",
+      "created_at": "2025-09-21T02:20:21"
+    },
+    {
+      "id": 3,
+      "name": "赵权",
+      "username": "zhaoquan",
+      "password_hash": "scrypt:32768:8:1$GMgpmdYxYwRQCUlw$2d0a181da9529f8dd0e9c9cdc61dc5bc43f9e4033bc01d72f8d2aca07aa0711eaa735424253b4dbae2afade49be8327c11f485dfef908c008b597839b41e321d",
+      "email": null,
+      "position": "机械工程师",
+      "role": "member",
+      "created_at": "2025-09-21T02:20:21"
+    },
+    {
+      "id": 4,
+      "name": "金航杰",
+      "username": "jinhangjie",
+      "password_hash": "scrypt:32768:8:1$GMgpmdYxYwRQCUlw$2d0a181da9529f8dd0e9c9cdc61dc5bc43f9e4033bc01d72f8d2aca07aa0711eaa735424253b4dbae2afade49be8327c11f485dfef908c008b597839b41e321d",
+      "email": null,
+      "position": "PCB工程师",
+      "role": "member",
+      "created_at": "2025-09-21T02:20:21"
+    },
+    {
+      "id": 5,
+      "name": "高建鹏",
+      "username": "gaojianpeng",
+      "password_hash": "scrypt:32768:8:1$GMgpmdYxYwRQCUlw$2d0a181da9529f8dd0e9c9cdc61dc5bc43f9e4033bc01d72f8d2aca07aa0711eaa735424253b4dbae2afade49be8327c11f485dfef908c008b597839b41e321d",
+      "email": null,
+      "position": "PCB工程师",
+      "role": "member",
+      "created_at": "2025-09-21T02:20:21"
+    },
+    {
+      "id": 6,
+      "name": "王鹏",
+      "username": "wangpeng",
+      "password_hash": "scrypt:32768:8:1$GMgpmdYxYwRQCUlw$2d0a181da9529f8dd0e9c9cdc61dc5bc43f9e4033bc01d72f8d2aca07aa0711eaa735424253b4dbae2afade49be8327c11f485dfef908c008b597839b41e321d",
+      "email": null,
+      "position": "高级研发工程师",
+      "role": "member",
+      "created_at": "2025-09-21T02:20:21"
+    },
+    {
+      "id": 7,
+      "name": "周引",
+      "username": "zhouyin",
+      "password_hash": "scrypt:32768:8:1$GMgpmdYxYwRQCUlw$2d0a181da9529f8dd0e9c9cdc61dc5bc43f9e4033bc01d72f8d2aca07aa0711eaa735424253b4dbae2afade49be8327c11f485dfef908c008b597839b41e321d",
+      "email": null,
+      "position": "机械工程师",
+      "role": "member",
+      "created_at": "2025-09-21T02:20:21"
+    },
+    {
+      "id": 8,
+      "name": "杨帆",
+      "username": "yangfan",
+      "password_hash": "scrypt:32768:8:1$GMgpmdYxYwRQCUlw$2d0a181da9529f8dd0e9c9cdc61dc5bc43f9e4033bc01d72f8d2aca07aa0711eaa735424253b4dbae2afade49be8327c11f485dfef908c008b597839b41e321d",
+      "email": null,
+      "position": "视觉工程师",
+      "role": "member",
+      "created_at": "2025-09-21T02:20:21"
+    },
+    {
+      "id": 9,
+      "name": "毕庆鹏",
+      "username": "biqingpeng",
+      "password_hash": "scrypt:32768:8:1$GMgpmdYxYwRQCUlw$2d0a181da9529f8dd0e9c9cdc61dc5bc43f9e4033bc01d72f8d2aca07aa0711eaa735424253b4dbae2afade49be8327c11f485dfef908c008b597839b41e321d",
+      "email": null,
+      "position": "质量工程师",
+      "role": "member",
+      "created_at": "2025-09-21T02:20:21"
+    },
+    {
+      "id": 10,
+      "name": "管理员",
+      "username": "admin",
+      "password_hash": "scrypt:32768:8:1$uo4oDI57jxBhFyLw$c19c9d46c308dcf398013db48cfb4775490eccb4bd8307bd45e63606f98eabf464389b2b25f4d22c88800b6be5f33f1d023414c0efcd924061e4cc0ad8d1ea04",
+      "email": "admin@test.com",
+      "position": "系统管理员",
+      "role": "department_manager",
+      "created_at": "2025-09-23T10:28:28.134884"
+    }
+  ],
+  "projects": [
+    {
+      "id": 12,
+      "name": "波纹板2#产线自动化改造",
+      "description": "",
+      "start_date": null,
+      "end_date": null,
+      "status": "project_acceptance",
+      "progress": 55,
+      "project_source": "horizontal",
+      "partner": "德创环保",
+      "amount": 12.5,
+      "created_at": "2025-11-03T08:58:13.197046"
+    },
+    {
+      "id": 13,
+      "name": "基于磁粉探伤与机器视觉融合的螺栓自动化检测试验平台开发",
+      "description": "",
+      "start_date": null,
+      "end_date": null,
+      "status": "project_implementation",
+      "progress": 52,
+      "project_source": "horizontal",
+      "partner": "太行科创有限公司",
+      "amount": 5.0,
+      "created_at": "2025-11-03T09:06:13.079395"
+    },
+    {
+      "id": 14,
+      "name": "铝锭自动化称重",
+      "description": "",
+      "start_date": null,
+      "end_date": null,
+      "status": "quotation_submitted",
+      "progress": 45,
+      "project_source": "horizontal",
+      "partner": "中信戴卡",
+      "amount": null,
+      "created_at": "2025-11-03T09:23:43.971547"
+    },
+    {
+      "id": 15,
+      "name": "波纹板1#产线自动化改造",
+      "description": "",
+      "start_date": null,
+      "end_date": null,
+      "status": "warranty_period",
+      "progress": 35,
+      "project_source": "horizontal",
+      "partner": "德创环保",
+      "amount": 19.8,
+      "created_at": "2025-11-03T09:25:31.152567"
+    },
+    {
+      "id": 16,
+      "name": "实验室智能化改造",
+      "description": "",
+      "start_date": null,
+      "end_date": null,
+      "status": "no_follow_up",
+      "progress": 100,
+      "project_source": "horizontal",
+      "partner": "西安热工院苏州分院",
+      "amount": null,
+      "created_at": "2025-11-03T09:46:42.436827"
+    },
+    {
+      "id": 17,
+      "name": "研发工业涤纶长丝智能品级评价分选系统",
+      "description": "",
+      "start_date": null,
+      "end_date": null,
+      "status": "vertical_approved",
+      "progress": 0,
+      "project_source": "vertical",
+      "partner": "绍兴市质检院",
+      "amount": null,
+      "created_at": "2025-11-03T10:36:08.293761"
+    },
+    {
+      "id": 18,
+      "name": "研发工业涤纶长丝智能品级评价分选系统",
+      "description": "纵向衍生",
+      "start_date": null,
+      "end_date": null,
+      "status": "contract_signed",
+      "progress": 26,
+      "project_source": "horizontal",
+      "partner": "绍兴市质检院",
+      "amount": null,
+      "created_at": "2025-11-03T10:41:33.907534"
+    },
+    {
+      "id": 19,
+      "name": "电池仓自动化打磨",
+      "description": "",
+      "start_date": "2025-10-15",
+      "end_date": null,
+      "status": "initial_contact",
+      "progress": 25,
+      "project_source": "horizontal",
+      "partner": "太行科创",
+      "amount": null,
+      "created_at": "2025-11-03T11:14:20.230230"
+    },
+    {
+      "id": 20,
+      "name": "变速壳体自动化生产线改造",
+      "description": "",
+      "start_date": null,
+      "end_date": null,
+      "status": "project_implementation",
+      "progress": 3,
+      "project_source": "horizontal",
+      "partner": "华晨动力",
+      "amount": 10.0,
+      "created_at": "2025-11-03T11:21:59.780653"
+    },
+    {
+      "id": 21,
+      "name": "轻量化汽车控制臂高质制造技术研究",
+      "description": "",
+      "start_date": null,
+      "end_date": null,
+      "status": "vertical_rejected",
+      "progress": 100,
+      "project_source": "vertical",
+      "partner": "金江机械",
+      "amount": null,
+      "created_at": "2025-11-03T11:35:33.243281"
+    },
+    {
+      "id": 22,
+      "name": "基于EIT技术应用于CFRP材料探伤项目",
+      "description": "",
+      "start_date": null,
+      "end_date": null,
+      "status": "project_implementation",
+      "progress": 80,
+      "project_source": "self_developed",
+      "partner": "",
+      "amount": null,
+      "created_at": "2025-11-03T11:38:07.950752"
+    }
+  ],
+  "project_members": [
+    {
+      "id": 12,
+      "project_id": 12,
+      "user_id": 1,
+      "role": "leader",
+      "joined_at": "2025-11-03T08:58:13.198878"
+    },
+    {
+      "id": 14,
+      "project_id": 14,
+      "user_id": 1,
+      "role": "leader",
+      "joined_at": "2025-11-03T09:23:43.972486"
+    },
+    {
+      "id": 15,
+      "project_id": 15,
+      "user_id": 1,
+      "role": "leader",
+      "joined_at": "2025-11-03T09:25:31.153764"
+    },
+    {
+      "id": 16,
+      "project_id": 16,
+      "user_id": 1,
+      "role": "leader",
+      "joined_at": "2025-11-03T09:46:42.437339"
+    },
+    {
+      "id": 19,
+      "project_id": 18,
+      "user_id": 6,
+      "role": "leader",
+      "joined_at": "2025-11-03T10:43:56.540315"
+    },
+    {
+      "id": 20,
+      "project_id": 13,
+      "user_id": 1,
+      "role": "leader",
+      "joined_at": "2025-11-03T11:00:50.298631"
+    },
+    {
+      "id": 22,
+      "project_id": 19,
+      "user_id": 1,
+      "role": "leader",
+      "joined_at": "2025-11-03T11:14:20.231391"
+    },
+    {
+      "id": 23,
+      "project_id": 20,
+      "user_id": 6,
+      "role": "leader",
+      "joined_at": "2025-11-03T11:21:59.781727"
+    },
+    {
+      "id": 24,
+      "project_id": 17,
+      "user_id": 6,
+      "role": "leader",
+      "joined_at": "2025-11-03T11:34:59.028480"
+    },
+    {
+      "id": 25,
+      "project_id": 21,
+      "user_id": 6,
+      "role": "leader",
+      "joined_at": "2025-11-03T11:35:33.244384"
+    },
+    {
+      "id": 26,
+      "project_id": 22,
+      "user_id": 4,
+      "role": "leader",
+      "joined_at": "2025-11-03T11:38:07.951584"
+    }
+  ],
+  "modules": [
+    {
+      "id": 4,
+      "project_id": 12,
+      "name": "现场调试",
+      "description": "",
+      "assigned_to_id": 3,
+      "progress": 100,
+      "start_date": null,
+      "end_date": null,
+      "status": "completed",
+      "created_at": "2025-11-03T09:00:00.770526"
+    },
+    {
+      "id": 6,
+      "project_id": 13,
+      "name": "物料采购",
+      "description": "",
+      "assigned_to_id": 7,
+      "progress": 100,
+      "start_date": null,
+      "end_date": null,
+      "status": "completed",
+      "created_at": "2025-11-03T09:07:06.013818"
+    },
+    {
+      "id": 8,
+      "project_id": 14,
+      "name": "设计方案及提供报价",
+      "description": "",
+      "assigned_to_id": 7,
+      "progress": 45,
+      "start_date": null,
+      "end_date": null,
+      "status": "in_progress",
+      "created_at": "2025-11-03T09:24:36.371322"
+    },
+    {
+      "id": 9,
+      "project_id": 15,
+      "name": "完成验收，开始质保",
+      "description": "",
+      "assigned_to_id": 1,
+      "progress": 35,
+      "start_date": null,
+      "end_date": null,
+      "status": "in_progress",
+      "created_at": "2025-11-03T09:27:23.174006"
+    },
+    {
+      "id": 11,
+      "project_id": 16,
+      "name": "投标",
+      "description": "",
+      "assigned_to_id": 1,
+      "progress": 100,
+      "start_date": null,
+      "end_date": null,
+      "status": "completed",
+      "created_at": "2025-11-03T09:47:40.172344"
+    },
+    {
+      "id": 12,
+      "project_id": 16,
+      "name": "开标结果查询",
+      "description": "",
+      "assigned_to_id": 1,
+      "progress": 100,
+      "start_date": "2025-07-21",
+      "end_date": "2025-07-21",
+      "status": "completed",
+      "created_at": "2025-11-03T09:49:15.199414"
+    },
+    {
+      "id": 13,
+      "project_id": 13,
+      "name": "研究院设备组装",
+      "description": "",
+      "assigned_to_id": 2,
+      "progress": 100,
+      "start_date": null,
+      "end_date": null,
+      "status": "completed",
+      "created_at": "2025-11-03T10:11:21.025977"
+    },
+    {
+      "id": 14,
+      "project_id": 13,
+      "name": "设备发货及现场组装",
+      "description": "",
+      "assigned_to_id": 7,
+      "progress": 10,
+      "start_date": null,
+      "end_date": null,
+      "status": "in_progress",
+      "created_at": "2025-11-03T10:13:42.019204"
+    },
+    {
+      "id": 15,
+      "project_id": 12,
+      "name": "项目验收",
+      "description": "",
+      "assigned_to_id": 1,
+      "progress": 10,
+      "start_date": null,
+      "end_date": null,
+      "status": "in_progress",
+      "created_at": "2025-11-03T10:30:32.970470"
+    },
+    {
+      "id": 16,
+      "project_id": 17,
+      "name": "提交材料",
+      "description": "",
+      "assigned_to_id": 6,
+      "progress": 100,
+      "start_date": null,
+      "end_date": null,
+      "status": "completed",
+      "created_at": "2025-11-03T10:37:10.952634"
+    },
+    {
+      "id": 17,
+      "project_id": 17,
+      "name": "评审",
+      "description": "",
+      "assigned_to_id": 6,
+      "progress": 100,
+      "start_date": null,
+      "end_date": null,
+      "status": "completed",
+      "created_at": "2025-11-03T10:37:31.332508"
+    },
+    {
+      "id": 18,
+      "project_id": 18,
+      "name": "合同签订",
+      "description": "",
+      "assigned_to_id": 6,
+      "progress": 26,
+      "start_date": null,
+      "end_date": null,
+      "status": "in_progress",
+      "created_at": "2025-11-03T10:42:08.211391"
+    },
+    {
+      "id": 19,
+      "project_id": 19,
+      "name": "确认用户需求",
+      "description": "",
+      "assigned_to_id": 1,
+      "progress": 25,
+      "start_date": null,
+      "end_date": null,
+      "status": "in_progress",
+      "created_at": "2025-11-03T11:14:55.707437"
+    },
+    {
+      "id": 20,
+      "project_id": 20,
+      "name": "机械/电气设计",
+      "description": "",
+      "assigned_to_id": 2,
+      "progress": 10,
+      "start_date": null,
+      "end_date": null,
+      "status": "in_progress",
+      "created_at": "2025-11-03T11:23:17.390053"
+    },
+    {
+      "id": 21,
+      "project_id": 21,
+      "name": "审核结果",
+      "description": "",
+      "assigned_to_id": 6,
+      "progress": 100,
+      "start_date": null,
+      "end_date": null,
+      "status": "completed",
+      "created_at": "2025-11-03T11:36:13.892281"
+    },
+    {
+      "id": 22,
+      "project_id": 22,
+      "name": "64路EIT测试电路板套件软硬件开发",
+      "description": "",
+      "assigned_to_id": 4,
+      "progress": 80,
+      "start_date": null,
+      "end_date": null,
+      "status": "in_progress",
+      "created_at": "2025-11-03T11:39:06.834674"
+    },
+    {
+      "id": 23,
+      "project_id": 13,
+      "name": "现场调试",
+      "description": "",
+      "assigned_to_id": 7,
+      "progress": 0,
+      "start_date": null,
+      "end_date": null,
+      "status": "not_started",
+      "created_at": "2025-11-03T13:44:16.565633"
+    },
+    {
+      "id": 24,
+      "project_id": 20,
+      "name": "设备组装",
+      "description": "",
+      "assigned_to_id": 2,
+      "progress": 0,
+      "start_date": null,
+      "end_date": null,
+      "status": "not_started",
+      "created_at": "2025-11-03T13:45:10.239464"
+    },
+    {
+      "id": 25,
+      "project_id": 20,
+      "name": "设备调试",
+      "description": "",
+      "assigned_to_id": 2,
+      "progress": 0,
+      "start_date": null,
+      "end_date": null,
+      "status": "not_started",
+      "created_at": "2025-11-03T13:46:00.694111"
+    }
+  ],
+  "module_assignments": [
+    {
+      "id": 4,
+      "module_id": 4,
+      "user_id": 3,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:00:00.798049"
+    },
+    {
+      "id": 5,
+      "module_id": 4,
+      "user_id": 7,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:00:00.799456"
+    },
+    {
+      "id": 6,
+      "module_id": 4,
+      "user_id": 2,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:00:00.800627"
+    },
+    {
+      "id": 11,
+      "module_id": 6,
+      "user_id": 7,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:07:06.036637"
+    },
+    {
+      "id": 12,
+      "module_id": 6,
+      "user_id": 8,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:07:06.037611"
+    },
+    {
+      "id": 13,
+      "module_id": 6,
+      "user_id": 2,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:07:06.038375"
+    },
+    {
+      "id": 17,
+      "module_id": 8,
+      "user_id": 7,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:24:36.393342"
+    },
+    {
+      "id": 18,
+      "module_id": 9,
+      "user_id": 1,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:27:23.191336"
+    },
+    {
+      "id": 21,
+      "module_id": 11,
+      "user_id": 1,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:47:40.194893"
+    },
+    {
+      "id": 22,
+      "module_id": 11,
+      "user_id": 7,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:47:40.195666"
+    },
+    {
+      "id": 23,
+      "module_id": 11,
+      "user_id": 8,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:47:40.196295"
+    },
+    {
+      "id": 24,
+      "module_id": 12,
+      "user_id": 1,
+      "role": "member",
+      "assigned_at": "2025-11-03T09:49:15.215218"
+    },
+    {
+      "id": 25,
+      "module_id": 13,
+      "user_id": 2,
+      "role": "member",
+      "assigned_at": "2025-11-03T10:11:21.052137"
+    },
+    {
+      "id": 26,
+      "module_id": 14,
+      "user_id": 7,
+      "role": "member",
+      "assigned_at": "2025-11-03T10:13:42.035773"
+    },
+    {
+      "id": 27,
+      "module_id": 14,
+      "user_id": 8,
+      "role": "member",
+      "assigned_at": "2025-11-03T10:13:42.036579"
+    },
+    {
+      "id": 28,
+      "module_id": 14,
+      "user_id": 2,
+      "role": "member",
+      "assigned_at": "2025-11-03T10:13:42.037084"
+    },
+    {
+      "id": 29,
+      "module_id": 15,
+      "user_id": 1,
+      "role": "member",
+      "assigned_at": "2025-11-03T10:30:32.994784"
+    },
+    {
+      "id": 30,
+      "module_id": 8,
+      "user_id": 2,
+      "role": "member",
+      "assigned_at": "2025-11-03T10:32:01.321551"
+    },
+    {
+      "id": 31,
+      "module_id": 8,
+      "user_id": 8,
+      "role": "member",
+      "assigned_at": "2025-11-03T10:32:01.321885"
+    },
+    {
+      "id": 32,
+      "module_id": 16,
+      "user_id": 6,
+      "role": "member",
+      "assigned_at": "2025-11-03T10:37:10.972853"
+    },
+    {
+      "id": 33,
+      "module_id": 17,
+      "user_id": 6,
+      "role": "member",
+      "assigned_at": "2025-11-03T10:37:31.351313"
+    },
+    {
+      "id": 34,
+      "module_id": 18,
+      "user_id": 6,
+      "role": "member",
+      "assigned_at": "2025-11-03T10:42:08.230321"
+    },
+    {
+      "id": 35,
+      "module_id": 19,
+      "user_id": 1,
+      "role": "member",
+      "assigned_at": "2025-11-03T11:14:55.729908"
+    },
+    {
+      "id": 36,
+      "module_id": 19,
+      "user_id": 3,
+      "role": "member",
+      "assigned_at": "2025-11-03T11:14:55.731328"
+    },
+    {
+      "id": 37,
+      "module_id": 20,
+      "user_id": 2,
+      "role": "member",
+      "assigned_at": "2025-11-03T11:23:17.407785"
+    },
+    {
+      "id": 38,
+      "module_id": 20,
+      "user_id": 3,
+      "role": "member",
+      "assigned_at": "2025-11-03T11:23:17.408457"
+    },
+    {
+      "id": 39,
+      "module_id": 21,
+      "user_id": 6,
+      "role": "member",
+      "assigned_at": "2025-11-03T11:36:13.908038"
+    },
+    {
+      "id": 40,
+      "module_id": 22,
+      "user_id": 4,
+      "role": "member",
+      "assigned_at": "2025-11-03T11:39:06.852572"
+    },
+    {
+      "id": 41,
+      "module_id": 22,
+      "user_id": 5,
+      "role": "member",
+      "assigned_at": "2025-11-03T11:39:06.853367"
+    },
+    {
+      "id": 42,
+      "module_id": 23,
+      "user_id": 7,
+      "role": "member",
+      "assigned_at": "2025-11-03T13:44:16.604954"
+    },
+    {
+      "id": 43,
+      "module_id": 23,
+      "user_id": 8,
+      "role": "member",
+      "assigned_at": "2025-11-03T13:44:16.605378"
+    },
+    {
+      "id": 44,
+      "module_id": 23,
+      "user_id": 2,
+      "role": "member",
+      "assigned_at": "2025-11-03T13:44:16.605779"
+    },
+    {
+      "id": 45,
+      "module_id": 24,
+      "user_id": 2,
+      "role": "member",
+      "assigned_at": "2025-11-03T13:45:10.254589"
+    },
+    {
+      "id": 46,
+      "module_id": 24,
+      "user_id": 3,
+      "role": "member",
+      "assigned_at": "2025-11-03T13:45:10.255193"
+    },
+    {
+      "id": 47,
+      "module_id": 25,
+      "user_id": 2,
+      "role": "member",
+      "assigned_at": "2025-11-03T13:46:00.711055"
+    },
+    {
+      "id": 48,
+      "module_id": 25,
+      "user_id": 3,
+      "role": "member",
+      "assigned_at": "2025-11-03T13:46:00.712113"
+    }
+  ],
+  "work_records": [
+    {
+      "id": 3,
+      "module_id": 11,
+      "week_start": "2025-07-05",
+      "week_end": "2025-07-19",
+      "work_content": "完成标书并进行投标",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T09:48:39.467914"
+    },
+    {
+      "id": 4,
+      "module_id": 12,
+      "week_start": "2025-11-03",
+      "week_end": "2025-11-09",
+      "work_content": "查询开标结果，未中标",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T09:51:50.797067"
+    },
+    {
+      "id": 5,
+      "module_id": 12,
+      "week_start": "2025-07-21",
+      "week_end": "2025-07-21",
+      "work_content": "查询开标结果，未中标",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T09:52:27.805794"
+    },
+    {
+      "id": 6,
+      "module_id": 9,
+      "week_start": "2025-08-13",
+      "week_end": "2026-07-12",
+      "work_content": "完成项目验收，开始为期一年质保",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T09:56:10.109131"
+    },
+    {
+      "id": 7,
+      "module_id": 4,
+      "week_start": "2025-09-17",
+      "week_end": "2025-10-23",
+      "work_content": "完成现场调试",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T09:56:46.800719"
+    },
+    {
+      "id": 9,
+      "module_id": 6,
+      "week_start": "2025-11-03",
+      "week_end": "2025-11-09",
+      "work_content": "完成物料采购及到货验收",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T10:09:16.019632"
+    },
+    {
+      "id": 11,
+      "module_id": 13,
+      "week_start": "2025-09-18",
+      "week_end": "2025-10-09",
+      "work_content": "",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T10:11:39.252102"
+    },
+    {
+      "id": 12,
+      "module_id": 14,
+      "week_start": "2025-10-11",
+      "week_end": "2025-10-15",
+      "work_content": "完成设备发货到客户现场，并让客户拍照查看材料无缺失",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T10:14:33.553319"
+    },
+    {
+      "id": 13,
+      "module_id": 15,
+      "week_start": "2025-10-31",
+      "week_end": "2025-10-31",
+      "work_content": "联系客户申请项目验收",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T10:30:56.154427"
+    },
+    {
+      "id": 14,
+      "module_id": 8,
+      "week_start": "2025-10-27",
+      "week_end": "2025-11-05",
+      "work_content": "进行报价",
+      "achievements": null,
+      "issues": null,
+      "next_week_plan": null,
+      "created_by_id": 1,
+      "created_at": "2025-11-03T10:32:24.153257"
+    },
+    {
+      "id": 15,
+      "module_id": 8,
+      "week_start": "2025-11-13",
+      "week_end": "2025-11-17",
+      "work_content": "完成项目估价及报价，进行相关设计方案修改",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T10:33:28.695202"
+    },
+    {
+      "id": 16,
+      "module_id": 16,
+      "week_start": "2025-07-15",
+      "week_end": "2025-07-20",
+      "work_content": "提交相关材料，等待评审结果",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T10:38:26.320870"
+    },
+    {
+      "id": 17,
+      "module_id": 17,
+      "week_start": "2025-10-20",
+      "week_end": "2025-10-20",
+      "work_content": "通过评审，准备合同签订",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T10:38:50.896507"
+    },
+    {
+      "id": 18,
+      "module_id": 18,
+      "week_start": "2025-11-03",
+      "week_end": "2025-11-03",
+      "work_content": "提交盖章申请，合同审核中",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T10:42:34.625191"
+    },
+    {
+      "id": 19,
+      "module_id": 19,
+      "week_start": "2025-10-22",
+      "week_end": "2025-10-22",
+      "work_content": "现场查看打磨设备及打磨样品，确认部分参数需求",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T11:15:49.103455"
+    },
+    {
+      "id": 20,
+      "module_id": 19,
+      "week_start": "2025-10-30",
+      "week_end": "2025-10-30",
+      "work_content": "收到客户对参数的反馈，等待与客户会议沟通",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T11:16:49.260538"
+    },
+    {
+      "id": 21,
+      "module_id": 20,
+      "week_start": "2025-09-20",
+      "week_end": "2025-09-20",
+      "work_content": "开始进行相关设计",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T11:23:48.405540"
+    },
+    {
+      "id": 22,
+      "module_id": 21,
+      "week_start": "2025-08-13",
+      "week_end": "2025-08-13",
+      "work_content": "未通过审核",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T11:36:58.154479"
+    },
+    {
+      "id": 23,
+      "module_id": 22,
+      "week_start": "2025-06-15",
+      "week_end": "2025-06-15",
+      "work_content": "完成首版64路EIT测试电路板套件软硬件开发，后续根据学生要求调试优化",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T11:39:35.587483"
+    }
+  ]
+}
