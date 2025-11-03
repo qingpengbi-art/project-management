@@ -208,5 +208,5 @@ fi
 # 启动应用
 echo "🌐 启动 Web 服务..."
 cd /app/backend
-exec gunicorn --bind 0.0.0.0:${PORT:-5001} --workers 4 --timeout 120 app:app
+exec python3 app.py
 
