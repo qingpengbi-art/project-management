@@ -54,9 +54,10 @@ COPY --chown=appuser:appuser docker-start.sh /app/
 COPY --chown=appuser:appuser smart_start.sh /app/
 RUN chmod +x /app/docker-start.sh /app/smart_start.sh
 
-# 复制数据导出文件（如果存在）
-COPY --chown=appuser:appuser database_export.json /app/ 2>/dev/null || echo "No data export file"
-COPY --chown=appuser:appuser import_database.py /app/ 2>/dev/null || echo "No import script"
+# 复制数据导出文件和导入脚本
+COPY --chown=appuser:appuser database_export.json /app/
+COPY --chown=appuser:appuser import_database.py /app/
+COPY --chown=appuser:appuser export_database.py /app/
 
 # 复制初始化脚本
 COPY --chown=appuser:appuser backend/models/database.py /app/backend/models/
