@@ -87,11 +87,6 @@
             <el-icon><Plus /></el-icon>
             新建项目
           </el-button>
-          
-          <el-button @click="refreshData">
-            <el-icon><Refresh /></el-icon>
-            刷新
-          </el-button>
         </div>
       </div>
     </div>
@@ -239,8 +234,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Search, 
-  Plus, 
-  Refresh,
+  Plus,
   FolderOpened
 } from '@element-plus/icons-vue'
 import { useProjectStore } from '@/stores/project'

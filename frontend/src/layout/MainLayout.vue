@@ -43,15 +43,6 @@
           <h1 class="page-title">{{ currentPageTitle }}</h1>
         </div>
         <div class="header-right">
-          <el-button 
-            v-if="authStore.hasPermission('create_project')"
-            type="primary" 
-            @click="showCreateDialog"
-          >
-            <el-icon><Plus /></el-icon>
-            新建项目
-          </el-button>
-          
           <!-- 用户信息 -->
           <el-dropdown @command="handleUserCommand" class="user-dropdown">
             <div class="user-info">
@@ -78,11 +69,6 @@
       </div>
     </main>
 
-    <!-- 创建项目对话框 -->
-    <CreateProjectDialog 
-      v-model="createDialogVisible"
-      @success="handleCreateSuccess"
-    />
   </div>
 </template>
 
@@ -90,8 +76,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Plus, Expand, Fold } from '@element-plus/icons-vue'
-import CreateProjectDialog from '@/components/CreateProjectDialog.vue'
+import { Expand, Fold } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useAuthStore } from '@/stores/auth'
 
@@ -102,9 +87,6 @@ const authStore = useAuthStore()
 
 // 侧边栏状态
 const sidebarCollapsed = ref(false)
-
-// 创建项目对话框
-const createDialogVisible = ref(false)
 
 // 菜单项
 const menuItems = computed(() => {
@@ -131,17 +113,6 @@ const currentPageTitle = computed(() => {
 // 切换侧边栏
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
-}
-
-// 显示创建项目对话框
-const showCreateDialog = () => {
-  createDialogVisible.value = true
-}
-
-// 处理创建成功
-const handleCreateSuccess = () => {
-  ElMessage.success('项目创建成功')
-  // 可以在这里刷新项目列表或导航到新项目
 }
 
 // 获取角色显示文本
