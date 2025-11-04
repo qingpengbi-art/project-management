@@ -263,7 +263,13 @@
           </el-table-column>
           
           <!-- 合同金额 -->
-          <el-table-column prop="contract_amount" label="合同金额(万元)" width="130" align="right" header-align="center">
+          <el-table-column prop="contract_amount" width="110" align="right" header-align="center">
+            <template #header>
+              <div class="amount-header">
+                <div>合同金额</div>
+                <div class="unit-label">(万元)</div>
+              </div>
+            </template>
             <template #default="{ row }">
               <span v-if="row.contract_amount != null" class="amount-text">
                 ¥{{ formatAmount(row.contract_amount) }}
@@ -273,7 +279,13 @@
           </el-table-column>
           
           <!-- 到账金额 -->
-          <el-table-column prop="received_amount" label="到账金额(万元)" width="130" align="right" header-align="center">
+          <el-table-column prop="received_amount" width="110" align="right" header-align="center">
+            <template #header>
+              <div class="amount-header">
+                <div>到账金额</div>
+                <div class="unit-label">(万元)</div>
+              </div>
+            </template>
             <template #default="{ row }">
               <span v-if="row.received_amount != null" class="amount-text">
                 ¥{{ formatAmount(row.received_amount) }}
@@ -2210,6 +2222,20 @@ onMounted(() => {
 .no-partner {
   color: var(--apple-gray-5);
   font-size: 13px;
+}
+
+.amount-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.3;
+  
+  .unit-label {
+    font-size: 11px;
+    color: var(--apple-gray-5);
+    font-weight: 400;
+    margin-top: 2px;
+  }
 }
 
 .amount-text {
