@@ -262,6 +262,26 @@
             </template>
           </el-table-column>
           
+          <!-- 合同金额 -->
+          <el-table-column prop="contract_amount" label="合同金额" width="120" align="right" header-align="center">
+            <template #default="{ row }">
+              <span v-if="row.contract_amount != null" class="amount-text">
+                ¥{{ formatAmount(row.contract_amount) }}
+              </span>
+              <span v-else class="no-amount">-</span>
+            </template>
+          </el-table-column>
+          
+          <!-- 到账金额 -->
+          <el-table-column prop="received_amount" label="到账金额" width="120" align="right" header-align="center">
+            <template #default="{ row }">
+              <span v-if="row.received_amount != null" class="amount-text">
+                ¥{{ formatAmount(row.received_amount) }}
+              </span>
+              <span v-else class="no-amount">-</span>
+            </template>
+          </el-table-column>
+          
           <!-- 项目进度（纵向项目不显示） -->
           <el-table-column prop="progress" label="项目进度" width="150" align="center" header-align="center">
             <template #default="{ row }">
@@ -796,6 +816,9 @@ const exportToExcel = async () => {
   exportData.push({
     '项目名称': '=== 项目汇总信息 ===',
     '状态': '',
+    '合作方': '',
+    '合同金额': '',
+    '到账金额': '',
     '进度': '',
     '负责人': '',
     '模块名称': '',
@@ -811,6 +834,9 @@ const exportToExcel = async () => {
   exportData.push({
     '项目名称': `总项目数: ${overview.value.summary.total_projects}`,
     '状态': `进行中: ${overview.value.summary.active_projects}`,
+    '合作方': '',
+    '合同金额': '',
+    '到账金额': '',
     '进度': `平均进度: ${overview.value.summary.avg_progress}%`,
     '负责人': `已完成: ${completedCount.value}`,
     '模块名称': '',
@@ -834,6 +860,9 @@ const exportToExcel = async () => {
     exportData.push({
       '项目名称': project.name,
       '状态': getStatusText(project.status),
+      '合作方': project.partner || '-',
+      '合同金额': project.contract_amount != null ? `¥${formatAmount(project.contract_amount)}` : '-',
+      '到账金额': project.received_amount != null ? `¥${formatAmount(project.received_amount)}` : '-',
       '进度': progressDisplay,
       '负责人': project.leader?.name || '未指定',
       '模块名称': '=== 项目模块 ===',
@@ -874,6 +903,9 @@ const exportToExcel = async () => {
       exportData.push({
         '项目名称': '',
         '状态': '',
+        '合作方': '',
+        '合同金额': '',
+        '到账金额': '',
         '进度': '',
         '负责人': '',
         '模块名称': module.name,
@@ -983,6 +1015,15 @@ const getProjectRoleTagType = (project) => {
 const formatDate = (dateString) => {
   if (!dateString) return '未设置'
   return new Date(dateString).toLocaleDateString('zh-CN')
+}
+
+// 格式化金额
+const formatAmount = (amount) => {
+  if (amount == null) return '-'
+  return Number(amount).toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
 }
 
 const getModuleStatusText = (status) => {
@@ -2167,6 +2208,18 @@ onMounted(() => {
 }
 
 .no-partner {
+  color: var(--apple-gray-5);
+  font-size: 13px;
+}
+
+.amount-text {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+}
+
+.no-amount {
   color: var(--apple-gray-5);
   font-size: 13px;
 }
