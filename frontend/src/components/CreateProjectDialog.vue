@@ -79,7 +79,6 @@
               :step="0.01"
             >
               <template #prepend>¥</template>
-              <template #append>万元</template>
             </el-input>
           </el-form-item>
         </el-col>
@@ -93,7 +92,6 @@
               :step="0.01"
             >
               <template #prepend>¥</template>
-              <template #append>万元</template>
             </el-input>
           </el-form-item>
         </el-col>
