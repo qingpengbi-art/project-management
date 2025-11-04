@@ -112,7 +112,8 @@
       "progress": 55,
       "project_source": "horizontal",
       "partner": "德创环保",
-      "amount": 12.5,
+      "contract_amount": 12.5,
+      "received_amount": null,
       "created_at": "2025-11-03T08:58:13.197046"
     },
     {
@@ -125,7 +126,8 @@
       "progress": 52,
       "project_source": "horizontal",
       "partner": "太行科创有限公司",
-      "amount": 5.0,
+      "contract_amount": 5.0,
+      "received_amount": null,
       "created_at": "2025-11-03T09:06:13.079395"
     },
     {
@@ -138,20 +140,22 @@
       "progress": 45,
       "project_source": "horizontal",
       "partner": "中信戴卡",
-      "amount": null,
+      "contract_amount": null,
+      "received_amount": null,
       "created_at": "2025-11-03T09:23:43.971547"
     },
     {
       "id": 15,
       "name": "波纹板1#产线自动化改造",
       "description": "",
-      "start_date": null,
-      "end_date": null,
+      "start_date": "2024-11-19",
+      "end_date": "2025-12-17",
       "status": "warranty_period",
       "progress": 35,
       "project_source": "horizontal",
       "partner": "德创环保",
-      "amount": 19.8,
+      "contract_amount": 19.8,
+      "received_amount": null,
       "created_at": "2025-11-03T09:25:31.152567"
     },
     {
@@ -164,7 +168,8 @@
       "progress": 100,
       "project_source": "horizontal",
       "partner": "西安热工院苏州分院",
-      "amount": null,
+      "contract_amount": null,
+      "received_amount": null,
       "created_at": "2025-11-03T09:46:42.436827"
     },
     {
@@ -177,7 +182,8 @@
       "progress": 0,
       "project_source": "vertical",
       "partner": "绍兴市质检院",
-      "amount": null,
+      "contract_amount": null,
+      "received_amount": null,
       "created_at": "2025-11-03T10:36:08.293761"
     },
     {
@@ -190,7 +196,8 @@
       "progress": 26,
       "project_source": "horizontal",
       "partner": "绍兴市质检院",
-      "amount": null,
+      "contract_amount": null,
+      "received_amount": null,
       "created_at": "2025-11-03T10:41:33.907534"
     },
     {
@@ -203,7 +210,8 @@
       "progress": 25,
       "project_source": "horizontal",
       "partner": "太行科创",
-      "amount": null,
+      "contract_amount": null,
+      "received_amount": null,
       "created_at": "2025-11-03T11:14:20.230230"
     },
     {
@@ -216,7 +224,8 @@
       "progress": 3,
       "project_source": "horizontal",
       "partner": "华晨动力",
-      "amount": 10.0,
+      "contract_amount": 10.0,
+      "received_amount": null,
       "created_at": "2025-11-03T11:21:59.780653"
     },
     {
@@ -229,7 +238,8 @@
       "progress": 100,
       "project_source": "vertical",
       "partner": "金江机械",
-      "amount": null,
+      "contract_amount": null,
+      "received_amount": null,
       "created_at": "2025-11-03T11:35:33.243281"
     },
     {
@@ -242,7 +252,8 @@
       "progress": 80,
       "project_source": "self_developed",
       "partner": "",
-      "amount": null,
+      "contract_amount": null,
+      "received_amount": null,
       "created_at": "2025-11-03T11:38:07.950752"
     }
   ],
@@ -262,13 +273,6 @@
       "joined_at": "2025-11-03T09:23:43.972486"
     },
     {
-      "id": 15,
-      "project_id": 15,
-      "user_id": 1,
-      "role": "leader",
-      "joined_at": "2025-11-03T09:25:31.153764"
-    },
-    {
       "id": 16,
       "project_id": 16,
       "user_id": 1,
@@ -281,13 +285,6 @@
       "user_id": 6,
       "role": "leader",
       "joined_at": "2025-11-03T10:43:56.540315"
-    },
-    {
-      "id": 20,
-      "project_id": 13,
-      "user_id": 1,
-      "role": "leader",
-      "joined_at": "2025-11-03T11:00:50.298631"
     },
     {
       "id": 22,
@@ -323,6 +320,20 @@
       "user_id": 4,
       "role": "leader",
       "joined_at": "2025-11-03T11:38:07.951584"
+    },
+    {
+      "id": 27,
+      "project_id": 15,
+      "user_id": 1,
+      "role": "leader",
+      "joined_at": "2025-11-03T16:59:35.184895"
+    },
+    {
+      "id": 28,
+      "project_id": 13,
+      "user_id": 1,
+      "role": "leader",
+      "joined_at": "2025-11-03T17:06:38.087978"
     }
   ],
   "modules": [
@@ -1037,6 +1048,18 @@
       "next_week_plan": "",
       "created_by_id": 1,
       "created_at": "2025-11-03T11:39:35.587483"
+    },
+    {
+      "id": 24,
+      "module_id": 6,
+      "week_start": "2025-11-13",
+      "week_end": "2025-12-16",
+      "work_content": "材料采购",
+      "achievements": "",
+      "issues": null,
+      "next_week_plan": "",
+      "created_by_id": 1,
+      "created_at": "2025-11-03T17:02:24.379838"
     }
   ]
 }

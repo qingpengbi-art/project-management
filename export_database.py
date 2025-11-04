@@ -57,7 +57,8 @@ def export_data():
                 'progress': project.progress,
                 'project_source': project.project_source,
                 'partner': project.partner,
-                'amount': project.amount,
+                'contract_amount': project.contract_amount,
+                'received_amount': project.received_amount,
                 'created_at': project.created_at.isoformat() if project.created_at else None
             })
         print(f"   ✅ 导出 {len(data['projects'])} 个项目")
