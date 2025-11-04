@@ -99,10 +99,10 @@ class Project(db.Model):
     actual_end_date = db.Column(db.Date, nullable=True)
     status = db.Column(db.Enum(ProjectStatus), default=ProjectStatus.INITIAL_CONTACT)
     progress = db.Column(db.Integer, default=0)
-    priority = db.Column(db.Integer, default=1)
     project_source = db.Column(db.String(50), default='horizontal')  # 项目来源：horizontal/vertical/self_developed
     partner = db.Column(db.String(100), nullable=True)  # 合作方（仅横向项目）
-    amount = db.Column(db.Float, nullable=True)  # 项目金额（非必填）
+    contract_amount = db.Column(db.Float, nullable=True)  # 合同金额（非必填）
+    received_amount = db.Column(db.Float, nullable=True)  # 到账金额（非必填）
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     
@@ -123,9 +123,9 @@ class Project(db.Model):
             'status': self.status.value if self.status else None,
             'project_source': self.project_source,
             'partner': self.partner,
-            'amount': self.amount,
+            'contract_amount': self.contract_amount,
+            'received_amount': self.received_amount,
             'progress': self.progress,
-            'priority': self.priority,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

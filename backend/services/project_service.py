@@ -31,11 +31,11 @@ class ProjectService:
                 description=project_data.get('description'),
                 start_date=datetime.strptime(project_data.get('start_date'), '%Y-%m-%d').date() if project_data.get('start_date') else None,
                 end_date=datetime.strptime(project_data.get('end_date'), '%Y-%m-%d').date() if project_data.get('end_date') else None,
-                priority=project_data.get('priority', 1),
                 status=ProjectStatus(project_data.get('status', 'planning')),
                 project_source=project_source,  # 项目来源，默认横向
                 partner=project_data.get('partner'),  # 合作方（可选）
-                amount=project_data.get('amount'),  # 项目金额（可选）
+                contract_amount=project_data.get('contract_amount'),  # 合同金额（可选）
+                received_amount=project_data.get('received_amount'),  # 到账金额（可选）
                 progress=0 if project_source == 'vertical' else project_data.get('progress', 0)  # 纵向项目进度固定为0
             )
             
@@ -243,9 +243,6 @@ class ProjectService:
             if 'end_date' in project_data and project_data['end_date']:
                 project.end_date = datetime.strptime(project_data['end_date'], '%Y-%m-%d').date()
             
-            if 'priority' in project_data:
-                project.priority = project_data['priority']
-            
             if 'status' in project_data:
                 project.status = ProjectStatus(project_data['status'])
             
@@ -255,8 +252,11 @@ class ProjectService:
             if 'partner' in project_data:
                 project.partner = project_data['partner']
             
-            if 'amount' in project_data:
-                project.amount = project_data['amount']
+            if 'contract_amount' in project_data:
+                project.contract_amount = project_data['contract_amount']
+            
+            if 'received_amount' in project_data:
+                project.received_amount = project_data['received_amount']
             
             project.updated_at = datetime.now()
             
@@ -467,9 +467,10 @@ class ProjectService:
                     'member_count': len(project.members),
                     'start_date': project.start_date.isoformat() if project.start_date else None,
                     'end_date': project.end_date.isoformat() if project.end_date else None,
-                    'priority': project.priority,
                     'project_source': project.project_source,  # 添加项目来源
                     'partner': project.partner,  # 添加合作方
+                    'contract_amount': project.contract_amount,  # 合同金额
+                    'received_amount': project.received_amount,  # 到账金额
                     'updated_at': project.updated_at.isoformat() if project.updated_at else None
                 }
                 project_summary.append(project_info)

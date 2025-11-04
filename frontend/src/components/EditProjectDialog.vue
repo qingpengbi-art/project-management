@@ -40,18 +40,35 @@
         />
       </el-form-item>
       
-      <!-- 项目金额 -->
-      <el-form-item label="项目金额" prop="amount">
-        <el-input
-          v-model.number="form.amount"
-          type="number"
-          placeholder="请输入项目金额（选填）"
-          :min="0"
-          :step="0.01"
-        >
-          <template #prepend>¥</template>
-        </el-input>
-      </el-form-item>
+      <!-- 金额字段 -->
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="合同金额" prop="contract_amount">
+            <el-input
+              v-model.number="form.contract_amount"
+              type="number"
+              placeholder="请输入合同金额（选填）"
+              :min="0"
+              :step="0.01"
+            >
+              <template #prepend>¥</template>
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="到账金额" prop="received_amount">
+            <el-input
+              v-model.number="form.received_amount"
+              type="number"
+              placeholder="请输入到账金额（选填）"
+              :min="0"
+              :step="0.01"
+            >
+              <template #prepend>¥</template>
+            </el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
       
       <!-- 项目状态 - 根据项目类型动态显示 -->
       <el-form-item label="项目状态" prop="status">
@@ -158,7 +175,8 @@ const form = reactive({
   project_source: 'horizontal',
   partner: '',
   status: 'initial_contact',
-  amount: null,
+  contract_amount: null,
+  received_amount: null,
   start_date: '',
   end_date: '',
   leader: ''
@@ -256,7 +274,8 @@ const initDialog = async () => {
       status: props.project.status || 'initial_contact',
       project_source: props.project.project_source || 'horizontal',
       partner: props.project.partner || '',
-      amount: props.project.amount || null,
+      contract_amount: props.project.contract_amount || null,
+      received_amount: props.project.received_amount || null,
       start_date: props.project.start_date || '',
       end_date: props.project.end_date || '',
       leader: ''
@@ -301,7 +320,8 @@ const resetForm = () => {
     status: 'initial_contact',
     project_source: 'horizontal',
     partner: '',
-    amount: null,
+    contract_amount: null,
+    received_amount: null,
     start_date: '',
     end_date: '',
     leader: ''

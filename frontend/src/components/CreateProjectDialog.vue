@@ -59,41 +59,43 @@
         </el-col>
       </el-row>
 
+      <el-form-item label="项目类型" prop="project_source">
+        <el-select v-model="form.project_source" placeholder="选择项目类型" style="width: 100%" @change="handleProjectSourceChange">
+          <el-option label="横向" value="horizontal" />
+          <el-option label="纵向" value="vertical" />
+          <el-option label="自研" value="self_developed" />
+        </el-select>
+      </el-form-item>
+
+      <!-- 金额字段 -->
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item label="项目类型" prop="project_source">
-            <el-select v-model="form.project_source" placeholder="选择项目类型" style="width: 100%" @change="handleProjectSourceChange">
-              <el-option label="横向" value="horizontal" />
-              <el-option label="纵向" value="vertical" />
-              <el-option label="自研" value="self_developed" />
-            </el-select>
+          <el-form-item label="合同金额" prop="contract_amount">
+            <el-input
+              v-model.number="form.contract_amount"
+              type="number"
+              placeholder="请输入合同金额（选填）"
+              :min="0"
+              :step="0.01"
+            >
+              <template #prepend>¥</template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="优先级" prop="priority">
-            <el-select v-model="form.priority" placeholder="选择优先级" style="width: 100%">
-              <el-option label="低" :value="1" />
-              <el-option label="中低" :value="2" />
-              <el-option label="中" :value="3" />
-              <el-option label="中高" :value="4" />
-              <el-option label="高" :value="5" />
-            </el-select>
+          <el-form-item label="到账金额" prop="received_amount">
+            <el-input
+              v-model.number="form.received_amount"
+              type="number"
+              placeholder="请输入到账金额（选填）"
+              :min="0"
+              :step="0.01"
+            >
+              <template #prepend>¥</template>
+            </el-input>
           </el-form-item>
         </el-col>
       </el-row>
-
-      <!-- 项目金额 -->
-      <el-form-item label="项目金额" prop="amount">
-        <el-input
-          v-model.number="form.amount"
-          type="number"
-          placeholder="请输入项目金额（选填）"
-          :min="0"
-          :step="0.01"
-        >
-          <template #prepend>¥</template>
-        </el-input>
-      </el-form-item>
 
       <!-- 合作方（横向和纵向项目显示） -->
       <el-form-item v-if="form.project_source === 'horizontal' || form.project_source === 'vertical'" label="合作方" prop="partner">
@@ -197,11 +199,11 @@ const form = ref({
   description: '',
   start_date: '',
   end_date: '',
-  priority: 3,
   status: 'initial_contact',
   project_source: 'horizontal', // 默认横向
   partner: '', // 合作方
-  amount: null, // 项目金额
+  contract_amount: null, // 合同金额
+  received_amount: null, // 到账金额
   leader: ''
 })
 
@@ -268,11 +270,11 @@ const resetForm = () => {
     description: '',
     start_date: '',
     end_date: '',
-    priority: 3,
     status: 'initial_contact',
     project_source: 'horizontal',
     partner: '',
-    amount: null,
+    contract_amount: null,
+    received_amount: null,
     leader: ''
   }
   
