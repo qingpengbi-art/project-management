@@ -59,22 +59,22 @@
         </el-col>
       </el-row>
 
-      <el-form-item label="项目类型" prop="project_source">
-        <el-select v-model="form.project_source" placeholder="选择项目类型" style="width: 100%" @change="handleProjectSourceChange">
-          <el-option label="横向" value="horizontal" />
-          <el-option label="纵向" value="vertical" />
-          <el-option label="自研" value="self_developed" />
-        </el-select>
-      </el-form-item>
+          <el-form-item label="项目类型" prop="project_source">
+            <el-select v-model="form.project_source" placeholder="选择项目类型" style="width: 100%" @change="handleProjectSourceChange">
+              <el-option label="横向" value="horizontal" />
+              <el-option label="纵向" value="vertical" />
+              <el-option label="自研" value="self_developed" />
+            </el-select>
+          </el-form-item>
 
       <!-- 金额字段 -->
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item label="合同金额(万元)" prop="contract_amount">
+          <el-form-item label="合同金额" prop="contract_amount">
             <el-input
               v-model.number="form.contract_amount"
               type="number"
-              placeholder="请输入合同金额（选填）"
+              placeholder="请输入合同金额，单位：万元"
               :min="0"
               :step="0.01"
             >
@@ -83,11 +83,11 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="到账金额(万元)" prop="received_amount">
+          <el-form-item label="到账金额" prop="received_amount">
             <el-input
               v-model.number="form.received_amount"
               type="number"
-              placeholder="请输入到账金额（选填）"
+              placeholder="请输入到账金额，单位：万元"
               :min="0"
               :step="0.01"
             >
