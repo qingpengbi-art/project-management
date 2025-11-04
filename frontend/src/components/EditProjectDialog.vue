@@ -43,7 +43,7 @@
       <!-- 金额字段 -->
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item label="合同金额" prop="contract_amount">
+          <el-form-item label="合同金额(万元)" prop="contract_amount">
             <el-input
               v-model.number="form.contract_amount"
               type="number"
@@ -52,11 +52,12 @@
               :step="0.01"
             >
               <template #prepend>¥</template>
+              <template #append>万元</template>
             </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="到账金额" prop="received_amount">
+          <el-form-item label="到账金额(万元)" prop="received_amount">
             <el-input
               v-model.number="form.received_amount"
               type="number"
@@ -65,6 +66,7 @@
               :step="0.01"
             >
               <template #prepend>¥</template>
+              <template #append>万元</template>
             </el-input>
           </el-form-item>
         </el-col>

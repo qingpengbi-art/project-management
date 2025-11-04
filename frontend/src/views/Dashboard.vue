@@ -263,7 +263,7 @@
           </el-table-column>
           
           <!-- 合同金额 -->
-          <el-table-column prop="contract_amount" label="合同金额" width="120" align="right" header-align="center">
+          <el-table-column prop="contract_amount" label="合同金额(万元)" width="130" align="right" header-align="center">
             <template #default="{ row }">
               <span v-if="row.contract_amount != null" class="amount-text">
                 ¥{{ formatAmount(row.contract_amount) }}
@@ -273,7 +273,7 @@
           </el-table-column>
           
           <!-- 到账金额 -->
-          <el-table-column prop="received_amount" label="到账金额" width="120" align="right" header-align="center">
+          <el-table-column prop="received_amount" label="到账金额(万元)" width="130" align="right" header-align="center">
             <template #default="{ row }">
               <span v-if="row.received_amount != null" class="amount-text">
                 ¥{{ formatAmount(row.received_amount) }}
