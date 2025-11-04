@@ -2,14 +2,14 @@
   <el-dialog
     v-model="dialogVisible"
     title="创建新项目"
-    width="600px"
+    width="700px"
     :before-close="handleClose"
   >
     <el-form
       ref="formRef"
       :model="form"
       :rules="rules"
-      label-width="100px"
+      label-width="120px"
       label-position="left"
     >
       <el-form-item label="项目名称" prop="name">
@@ -70,11 +70,11 @@
       <!-- 金额字段 -->
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item label="合同金额" prop="contract_amount">
+          <el-form-item label="合同金额(万元)" prop="contract_amount">
             <el-input
               v-model.number="form.contract_amount"
               type="number"
-              placeholder="请输入合同金额，单位：万元"
+              placeholder="请输入合同金额（选填）"
               :min="0"
               :step="0.01"
             >
@@ -83,17 +83,17 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="到账金额" prop="received_amount">
-            <el-input
+          <el-form-item label="到账金额(万元)" prop="received_amount">
+        <el-input
               v-model.number="form.received_amount"
-              type="number"
-              placeholder="请输入到账金额，单位：万元"
-              :min="0"
-              :step="0.01"
-            >
-              <template #prepend>¥</template>
-            </el-input>
-          </el-form-item>
+          type="number"
+              placeholder="请输入到账金额（选填）"
+          :min="0"
+          :step="0.01"
+        >
+          <template #prepend>¥</template>
+        </el-input>
+      </el-form-item>
         </el-col>
       </el-row>
 
