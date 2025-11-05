@@ -93,6 +93,10 @@ def auto_import_data():
             # 导入项目
             print("📁 导入项目...")
             for project_data in data['projects']:
+                # 处理金额字段（兼容新旧字段名）
+                contract_amount = project_data.get('contract_amount') or project_data.get('amount')
+                received_amount = project_data.get('received_amount')
+                
                 project = Project(
                     id=project_data['id'],
                     name=project_data['name'],
@@ -103,7 +107,8 @@ def auto_import_data():
                     progress=project_data['progress'],
                     project_source=project_data['project_source'],
                     partner=project_data['partner'],
-                    amount=project_data['amount'],
+                    contract_amount=contract_amount,
+                    received_amount=received_amount,
                     created_at=datetime.fromisoformat(project_data['created_at']) if project_data['created_at'] else None
                 )
                 db.session.add(project)
