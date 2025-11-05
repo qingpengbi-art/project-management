@@ -11,6 +11,278 @@ from ..models.database import db, Project, ProjectMember, ProgressRecord, User, 
 class ProjectService:
     """项目服务类 - 处理项目相关的业务逻辑"""
     
+    # 状态阶段进度映射表
+    STATE_STAGE_PROGRESS = {
+        'initial_contact': {'stage': 1, 'progress': 5, 'label': '初步接触'},
+        'proposal_submitted': {'stage': 2, 'progress': 15, 'label': '提交方案'},
+        'quotation_submitted': {'stage': 3, 'progress': 20, 'label': '提交报价'},
+        'user_confirmation': {'stage': 4, 'progress': 25, 'label': '用户确认'},
+        'contract_signed': {'stage': 5, 'progress': 35, 'label': '合同签订'},
+        'project_implementation': {'stage': 6, 'progress': None, 'label': '项目实施'},
+        'project_acceptance': {'stage': 7, 'progress': 100, 'label': '项目验收'},
+        'warranty_period': {'stage': 8, 'progress': None, 'label': '维保期内'},
+        'post_warranty': {'stage': 9, 'progress': 100, 'label': '维保完成'},
+        'no_follow_up': {'stage': 0, 'progress': 0, 'label': '已终止'},
+        # 纵向项目状态
+        'vertical_declaration': {'stage': 1, 'progress': 25, 'label': '申报阶段'},
+        'vertical_review': {'stage': 2, 'progress': 50, 'label': '审核阶段'},
+        'vertical_approved': {'stage': 3, 'progress': 100, 'label': '审核通过'},
+        'vertical_rejected': {'stage': 0, 'progress': 0, 'label': '审核未通过'},
+    }
+    
+    @staticmethod
+    def get_progress_limits(status: str) -> Dict[str, int]:
+        """
+        获取状态对应的进度范围
+        
+        Args:
+            status: 项目状态
+            
+        Returns:
+            进度范围 {min, max, default, stage}
+        """
+        LIMITS = {
+            'initial_contact': {'min': 0, 'max': 5, 'default': 5, 'stage': 1, 'label': '初步接触'},
+            'proposal_submitted': {'min': 5, 'max': 15, 'default': 15, 'stage': 2, 'label': '提交方案'},
+            'quotation_submitted': {'min': 15, 'max': 20, 'default': 20, 'stage': 3, 'label': '提交报价'},
+            'user_confirmation': {'min': 20, 'max': 25, 'default': 25, 'stage': 4, 'label': '用户确认'},
+            'contract_signed': {'min': 25, 'max': 35, 'default': 35, 'stage': 5, 'label': '合同签订'}
+        }
+        return LIMITS.get(status, {'min': 0, 'max': 100, 'default': 0, 'stage': 0, 'label': '未知'})
+    
+    @staticmethod
+    def calculate_project_progress(project) -> Dict[str, Any]:
+        """
+        计算项目进度（新版本 - 支持模块映射和手动进度）
+        
+        优先级：
+        1. 如果有模块 → 基于模块进度计算
+        2. 如果没有模块但有手动进度 → 使用手动进度
+        3. 否则 → 使用状态默认进度
+        
+        Args:
+            project: 项目对象
+            
+        Returns:
+            进度信息字典 {progress: int, type: str, info: str, ...}
+        """
+        status = project.status.value if hasattr(project.status, 'value') else project.status
+        project_source = project.project_source
+        manual_progress = getattr(project, 'manual_progress', None)
+        
+        # 获取项目的所有模块
+        modules = ProjectModule.query.filter_by(project_id=project.id).all()
+        has_modules = len(modules) > 0
+        
+        # 纵向项目：使用状态阶段进度
+        if project_source == 'vertical':
+            stage_info = ProjectService.STATE_STAGE_PROGRESS.get(status, {'progress': 0, 'label': '未知', 'stage': 0})
+            return {
+                'progress': stage_info['progress'],
+                'type': 'stage',
+                'stage': stage_info['stage'],
+                'label': stage_info['label'],
+                'info': '纵向项目阶段进度',
+                'source': 'status'
+            }
+        
+        # 项目验收阶段：85-90%，基于模块映射
+        if status == 'project_acceptance':
+            if has_modules:
+                # 计算模块平均进度
+                total_progress = sum(module.progress for module in modules)
+                avg_module_progress = total_progress / len(modules)
+                
+                # 将模块进度（0-100%）映射到验收阶段范围（85-90%）
+                # 公式：85 + (模块平均 / 100 × 5)
+                mapped_progress = 85 + (avg_module_progress / 100 * 5)
+                progress = round(mapped_progress)
+                
+                return {
+                    'progress': progress,
+                    'type': 'acceptance',
+                    'module_count': len(modules),
+                    'avg_module_progress': round(avg_module_progress),
+                    'label': '项目验收',
+                    'info': f'验收阶段，基于 {len(modules)} 个模块（平均 {round(avg_module_progress)}%），映射到 85-90%',
+                    'source': 'modules',
+                    'detail': {
+                        'stage': 7,
+                        'total_stages': 9,
+                        'range': '85-90%'
+                    }
+                }
+            else:
+                # 没有模块，使用默认值（范围中点）
+                return {
+                    'progress': 88,
+                    'type': 'acceptance',
+                    'label': '项目验收',
+                    'info': '验收阶段（未设置模块）',
+                    'source': 'default'
+                }
+        
+        if status == 'warranty_period':
+            if has_modules:
+                # 维保期内：90-100%，基于模块映射
+                total_progress = sum(module.progress for module in modules)
+                avg_module_progress = total_progress / len(modules)
+                
+                # 将模块进度（0-100%）映射到维保阶段范围（90-100%）
+                # 公式：90 + (模块平均 / 100 × 10)
+                mapped_progress = 90 + (avg_module_progress / 100 * 10)
+                progress = round(mapped_progress)
+                
+                return {
+                    'progress': progress,
+                    'type': 'warranty',
+                    'module_count': len(modules),
+                    'avg_module_progress': round(avg_module_progress),
+                    'label': '维保期内',
+                    'info': f'维保期内，基于 {len(modules)} 个模块（平均 {round(avg_module_progress)}%），映射到 90-100%',
+                    'source': 'modules',
+                    'detail': {
+                        'stage': 8,
+                        'total_stages': 9,
+                        'range': '90-100%'
+                    }
+                }
+            else:
+                # 没有模块，使用默认值（范围中点）
+                return {
+                    'progress': 95,
+                    'type': 'warranty',
+                    'label': '维保期内',
+                    'info': '维保期内（未设置模块）',
+                    'source': 'default'
+                }
+        
+        if status == 'post_warranty':
+            return {
+                'progress': 100,
+                'type': 'completed',
+                'label': '维保完成',
+                'info': '项目已完成',
+                'source': 'status'
+            }
+        
+        if status == 'no_follow_up':
+            return {
+                'progress': 0,
+                'type': 'terminated',
+                'label': '已终止',
+                'info': '项目已终止跟进',
+                'source': 'status'
+            }
+        
+        # 项目实施阶段：35-85%，基于模块映射
+        if status == 'project_implementation':
+            if has_modules:
+                # 计算模块平均进度
+                total_progress = sum(module.progress for module in modules)
+                avg_module_progress = total_progress / len(modules)
+                
+                # 将模块进度（0-100%）映射到项目实施范围（35-85%）
+                # 公式：35 + (模块平均 / 100 × 50)
+                mapped_progress = 35 + (avg_module_progress / 100 * 50)
+                final_progress = round(mapped_progress)
+                
+                return {
+                    'progress': final_progress,
+                    'type': 'implementation',
+                    'module_count': len(modules),
+                    'avg_module_progress': round(avg_module_progress),
+                    'info': f'项目实施，基于 {len(modules)} 个模块（平均 {round(avg_module_progress)}%），映射到 35-85%',
+                    'source': 'modules',
+                    'detail': {
+                        'stage': 6,
+                        'total_stages': 9,
+                        'range': '35-85%'
+                    }
+                }
+            else:
+                # 没有模块，使用默认值（范围中点）
+                return {
+                    'progress': 60,
+                    'type': 'implementation',
+                    'info': '项目实施中（未设置模块）',
+                    'module_count': 0,
+                    'source': 'default'
+                }
+        
+        # 前期阶段：优先级 模块 > 手动 > 默认
+        if status in ['initial_contact', 'proposal_submitted', 'quotation_submitted',
+                      'user_confirmation', 'contract_signed']:
+            
+            limits = ProjectService.get_progress_limits(status)
+            
+            # 优先级1：如果有模块，基于模块进度映射到阶段范围
+            if has_modules:
+                total_progress = sum(module.progress for module in modules)
+                avg_module_progress = total_progress / len(modules)
+                
+                # 将模块进度映射到当前阶段的范围
+                # 公式：阶段下限 + (模块平均 / 100 × 阶段范围)
+                range_size = limits['max'] - limits['min']
+                mapped_progress = limits['min'] + (avg_module_progress / 100 * range_size)
+                
+                return {
+                    'progress': round(mapped_progress),
+                    'type': 'stage_with_modules',
+                    'stage': limits['stage'],
+                    'total_stages': 7,
+                    'module_count': len(modules),
+                    'avg_module_progress': round(avg_module_progress),
+                    'label': limits['label'],
+                    'info': f'基于 {len(modules)} 个模块，映射到阶段范围 {limits["min"]}-{limits["max"]}%',
+                    'source': 'modules'
+                }
+            
+            # 优先级2：如果有手动进度，使用手动进度
+            if manual_progress is not None:
+                # 验证范围
+                if manual_progress < limits['min'] or manual_progress > limits['max']:
+                    # 超出范围，使用默认值
+                    return {
+                        'progress': limits['default'],
+                        'type': 'stage',
+                        'stage': limits['stage'],
+                        'total_stages': 7,
+                        'label': limits['label'],
+                        'info': f'手动进度超出范围，使用默认进度',
+                        'source': 'default',
+                        'error': f'手动进度 {manual_progress}% 超出范围 {limits["min"]}-{limits["max"]}%'
+                    }
+                
+                return {
+                    'progress': manual_progress,
+                    'type': 'stage_manual',
+                    'stage': limits['stage'],
+                    'total_stages': 7,
+                    'label': limits['label'],
+                    'info': '手动设置',
+                    'source': 'manual'
+                }
+            
+            # 优先级3：使用默认进度
+            return {
+                'progress': limits['default'],
+                'type': 'stage',
+                'stage': limits['stage'],
+                'total_stages': 7,
+                'label': limits['label'],
+                'info': '阶段默认进度',
+                'source': 'default'
+            }
+        
+        # 默认
+        return {
+            'progress': 0,
+            'type': 'unknown',
+            'info': '未知状态',
+            'source': 'error'
+        }
+    
     @staticmethod
     def create_project(project_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -130,9 +402,32 @@ class ProjectService:
                     if member.role == ProjectMemberRole.LEADER:
                         leaders.append(member_info)
                 
+                # 从模块中收集真实的项目成员（去重）
+                module_members = {}
+                project_modules = ProjectModule.query.filter_by(project_id=project.id).all()
+                for module in project_modules:
+                    # 获取模块分配的成员
+                    assignments = ModuleAssignment.query.filter_by(module_id=module.id).all()
+                    for assignment in assignments:
+                        user = assignment.user
+                        if user.id not in module_members:
+                            module_members[user.id] = {
+                                'id': user.id,
+                                'name': user.name,
+                                'position': user.position
+                            }
+                
                 project_dict['members'] = members
                 project_dict['leaders'] = leaders
-                project_dict['member_count'] = len(members)
+                # 成员数量使用从模块中收集的实际成员数
+                project_dict['member_count'] = len(module_members)
+                
+                # 计算项目进度（使用新的三层进度体系）
+                progress_info = ProjectService.calculate_project_progress(project)
+                project_dict['progress'] = progress_info['progress']
+                project_dict['progress_type'] = progress_info['type']
+                project_dict['progress_info'] = progress_info.get('info', '')
+                project_dict['progress_detail'] = progress_info  # 完整的进度信息
                 
                 # 添加最新进度记录
                 latest_record = ProgressRecord.query.filter_by(project_id=project.id)\
@@ -189,6 +484,13 @@ class ProjectService:
                 members.append(member_info)
             project_dict['members'] = members
             
+            # 计算项目进度（使用新的三层进度体系）
+            progress_info = ProjectService.calculate_project_progress(project)
+            project_dict['progress'] = progress_info['progress']
+            project_dict['progress_type'] = progress_info['type']
+            project_dict['progress_info'] = progress_info.get('info', '')
+            project_dict['progress_detail'] = progress_info  # 完整的进度信息
+            
             # 添加进度历史
             progress_history = []
             for record in project.progress_records:
@@ -237,11 +539,19 @@ class ProjectService:
             if 'description' in project_data:
                 project.description = project_data['description']
             
-            if 'start_date' in project_data and project_data['start_date']:
-                project.start_date = datetime.strptime(project_data['start_date'], '%Y-%m-%d').date()
+            if 'start_date' in project_data:
+                # 如果日期为空（None, null, 空字符串），则清空日期
+                if project_data['start_date']:
+                    project.start_date = datetime.strptime(project_data['start_date'], '%Y-%m-%d').date()
+                else:
+                    project.start_date = None
             
-            if 'end_date' in project_data and project_data['end_date']:
-                project.end_date = datetime.strptime(project_data['end_date'], '%Y-%m-%d').date()
+            if 'end_date' in project_data:
+                # 如果日期为空（None, null, 空字符串），则清空日期
+                if project_data['end_date']:
+                    project.end_date = datetime.strptime(project_data['end_date'], '%Y-%m-%d').date()
+                else:
+                    project.end_date = None
             
             if 'status' in project_data:
                 project.status = ProjectStatus(project_data['status'])
@@ -250,12 +560,15 @@ class ProjectService:
                 project.project_source = project_data['project_source']
             
             if 'partner' in project_data:
-                project.partner = project_data['partner']
+                # 合作方可以为空字符串或None
+                project.partner = project_data['partner'] if project_data['partner'] else None
             
             if 'contract_amount' in project_data:
+                # 金额可以为None（表示未设置）
                 project.contract_amount = project_data['contract_amount']
             
             if 'received_amount' in project_data:
+                # 金额可以为None（表示未设置）
                 project.received_amount = project_data['received_amount']
             
             project.updated_at = datetime.now()
@@ -426,6 +739,88 @@ class ProjectService:
             }
     
     @staticmethod
+    def update_manual_progress(project_id: int, progress: int) -> Dict[str, Any]:
+        """
+        更新项目的手动进度
+        仅适用于前期阶段（初步接触 → 合同签订）
+        
+        Args:
+            project_id: 项目ID
+            progress: 手动进度值（0-100）
+            
+        Returns:
+            更新结果
+        """
+        try:
+            project = Project.query.get(project_id)
+            if not project:
+                return {
+                    'success': False,
+                    'message': '项目不存在',
+                    'data': None
+                }
+            
+            status = project.status.value if hasattr(project.status, 'value') else project.status
+            
+            # 检查是否允许手动设置进度
+            allowed_statuses = ['initial_contact', 'proposal_submitted', 
+                              'quotation_submitted', 'user_confirmation', 
+                              'contract_signed']
+            
+            if status not in allowed_statuses:
+                return {
+                    'success': False,
+                    'message': f'当前状态不允许手动设置进度',
+                    'data': None
+                }
+            
+            # 获取进度范围限制
+            limits = ProjectService.get_progress_limits(status)
+            
+            # 验证进度范围
+            if progress < limits['min']:
+                return {
+                    'success': False,
+                    'message': f'进度不能低于 {limits["min"]}%（前一阶段上限）',
+                    'data': {'min': limits['min'], 'max': limits['max']}
+                }
+            
+            if progress > limits['max']:
+                return {
+                    'success': False,
+                    'message': f'进度不能超过 {limits["max"]}%（当前阶段上限）',
+                    'data': {'min': limits['min'], 'max': limits['max']}
+                }
+            
+            # 更新手动进度
+            project.manual_progress = progress
+            project.updated_at = datetime.now()
+            
+            db.session.commit()
+            
+            # 重新计算项目进度
+            progress_info = ProjectService.calculate_project_progress(project)
+            
+            return {
+                'success': True,
+                'message': f'进度已更新为 {progress}%',
+                'data': {
+                    'manual_progress': progress,
+                    'calculated_progress': progress_info['progress'],
+                    'limits': limits,
+                    'info': progress_info.get('info', '')
+                }
+            }
+            
+        except Exception as e:
+            db.session.rollback()
+            return {
+                'success': False,
+                'message': f'更新进度失败: {str(e)}',
+                'data': None
+            }
+    
+    @staticmethod
     def get_department_overview() -> Dict[str, Any]:
         """
         获取部门项目总览
@@ -450,8 +845,12 @@ class ProjectService:
             
             project_summary = []
             for project in projects:
+                # 使用新的进度计算逻辑
+                progress_info = ProjectService.calculate_project_progress(project)
+                current_progress = progress_info['progress']
+                
                 if project.status not in [ProjectStatus.NO_FOLLOW_UP]:
-                    total_progress += project.progress
+                    total_progress += current_progress
                     active_projects += 1
                 
                 # 获取项目负责人
@@ -462,7 +861,9 @@ class ProjectService:
                     'id': project.id,
                     'name': project.name,
                     'status': project.status.value,
-                    'progress': project.progress,
+                    'progress': current_progress,  # 使用计算后的进度
+                    'progress_type': progress_info.get('type', 'unknown'),  # 进度类型
+                    'progress_info': progress_info.get('info', ''),  # 进度说明
                     'leaders': leaders,
                     'member_count': len(project.members),
                     'start_date': project.start_date.isoformat() if project.start_date else None,

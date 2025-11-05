@@ -122,10 +122,17 @@
             <p>{{ project.description || '暂无描述' }}</p>
           </div>
 
-          <!-- 项目进度 - 纵向项目不显示 -->
-          <div v-if="project.project_source !== 'vertical'" class="project-progress">
+          <!-- 项目进度 - 纵向项目和不再跟进项目不显示 -->
+          <div v-if="project.project_source !== 'vertical' && project.status !== 'no_follow_up'" class="project-progress">
             <div class="progress-header">
               <span class="progress-label">进度</span>
+              <el-tooltip 
+                v-if="project.progress_info" 
+                :content="project.progress_info" 
+                placement="top"
+              >
+                <el-icon class="progress-info-icon"><InfoFilled /></el-icon>
+              </el-tooltip>
             </div>
             <div class="progress-circular">
               <el-progress 
@@ -133,13 +140,21 @@
                 :percentage="project.progress || 0"
                 :width="70"
                 :stroke-width="6"
-                :color="getProgressColor(project.progress)"
+                :color="getProgressColor(project.progress, project.progress_type)"
                 :show-text="true"
               >
                 <template #default="{ percentage }">
                   <span class="progress-text">{{ percentage }}%</span>
                 </template>
               </el-progress>
+            </div>
+            <div v-if="project.progress_detail" class="progress-detail-info">
+              <span v-if="project.progress_type === 'stage'" class="progress-stage">
+                阶段 {{ project.progress_detail.stage }}/{{ project.progress_detail.total_stages || 7 }}
+              </span>
+              <span v-else-if="project.progress_type === 'implementation' && project.progress_detail.module_count" class="progress-module">
+                {{ project.progress_detail.module_count }}个模块
+              </span>
             </div>
           </div>
 
@@ -148,10 +163,6 @@
             <div class="info-row">
               <span class="info-label">负责人:</span>
               <span class="info-value">{{ project.leaders?.map(leader => leader.name).join(', ') || '未分配' }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">项目类型:</span>
-              <span class="info-value">{{ getSourceText(project.project_source) }}</span>
             </div>
             <div class="info-row" v-if="project.project_source === 'horizontal' && project.partner">
               <span class="info-label">合作方:</span>
@@ -232,6 +243,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { InfoFilled } from '@element-plus/icons-vue'
 import { 
   Search, 
   Plus,
@@ -381,10 +393,38 @@ const goToProject = (id) => {
   router.push(`/projects/${id}`)
 }
 
-const getProgressColor = (progress) => {
+const getProgressColor = (progress, progressType) => {
+  // 根据进度类型调整颜色策略
   if (!progress || progress === 0) {
     return '#e4e7ed'
-  } else if (progress < 30) {
+  }
+  
+  // 阶段进度：使用更柔和的颜色，表示是参考值
+  if (progressType === 'stage') {
+    if (progress < 15) {
+      return '#909399'  // 灰色 - 初步接触
+    } else if (progress < 35) {
+      return '#409eff'  // 蓝色 - 方案/报价/确认
+    } else {
+      return '#67c23a'  // 绿色 - 合同签订
+    }
+  }
+  
+  // 实施进度：使用传统进度颜色
+  if (progressType === 'implementation') {
+    if (progress < 50) {
+      return '#e6a23c'  // 橙色 - 刚开始实施
+    } else if (progress < 80) {
+      return '#409eff'  // 蓝色 - 实施中
+    } else if (progress < 100) {
+      return '#67c23a'  // 绿色 - 接近完成
+    } else {
+      return '#67c23a'  // 绿色 - 完成
+    }
+  }
+  
+  // 其他类型（完成、维保等）：根据进度值
+  if (progress < 30) {
     return '#f56c6c'
   } else if (progress < 70) {
     return '#e6a23c'
@@ -699,6 +739,28 @@ watch(() => route.query, (newQuery) => {
   font-size: 14px;
   color: var(--text-secondary);
   font-weight: 500;
+}
+
+.progress-info-icon {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  cursor: help;
+  margin-left: 4px;
+}
+
+.progress-detail-info {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+.progress-stage,
+.progress-module {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: var(--bg-secondary);
+  border-radius: 4px;
 }
 
 .progress-value {
