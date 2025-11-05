@@ -56,7 +56,8 @@
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item command="changePassword">修改密码</el-dropdown-item>
+                <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -69,6 +70,11 @@
       </div>
     </main>
 
+    <!-- 修改密码对话框 -->
+    <ChangePasswordDialog
+      v-model:visible="changePasswordDialogVisible"
+      @success="handlePasswordChangeSuccess"
+    />
   </div>
 </template>
 
@@ -79,6 +85,7 @@ import { ElMessage } from 'element-plus'
 import { Expand, Fold } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useAuthStore } from '@/stores/auth'
+import ChangePasswordDialog from '@/components/ChangePasswordDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -87,6 +94,9 @@ const authStore = useAuthStore()
 
 // 侧边栏状态
 const sidebarCollapsed = ref(false)
+
+// 修改密码对话框
+const changePasswordDialogVisible = ref(false)
 
 // 菜单项
 const menuItems = computed(() => {
@@ -135,7 +145,14 @@ const handleUserCommand = async (command) => {
       console.error('退出登录失败:', error)
       ElMessage.error('退出登录失败')
     }
+  } else if (command === 'changePassword') {
+    changePasswordDialogVisible.value = true
   }
+}
+
+// 处理密码修改成功
+const handlePasswordChangeSuccess = () => {
+  // 密码修改成功后会自动跳转到登录页
 }
 
 // 初始化

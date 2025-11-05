@@ -73,7 +73,7 @@
           </template>
         </el-table-column>
         
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="280" fixed="right">
           <template #default="{ row }">
             <div class="action-buttons">
               <el-button
@@ -82,7 +82,7 @@
                 size="small"
                 @click="viewUserDetail(row)"
               >
-                查看详情
+                查看
               </el-button>
               <el-button
                 type="warning"
@@ -91,6 +91,14 @@
                 @click="showEditDialog(row)"
               >
                 编辑
+              </el-button>
+              <el-button
+                type="info"
+                plain
+                size="small"
+                @click="confirmResetPassword(row)"
+              >
+                重置密码
               </el-button>
               <el-button
                 type="danger"
@@ -451,6 +459,40 @@ const handleUpdateUser = async () => {
   } finally {
     editLoading.value = false
   }
+}
+
+// 重置密码
+const confirmResetPassword = (user) => {
+  ElMessageBox.confirm(
+    `确定要将用户 "${user.name}" 的密码重置为初始密码 "td123456" 吗？`,
+    '确认重置密码',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
+    try {
+      const response = await userApi.resetPassword(user.id)
+      if (response.success) {
+        ElMessage.success(response.message || '密码重置成功')
+        ElMessageBox.alert(
+          `用户名: ${response.data.username}\n初始密码: ${response.data.password}`,
+          '密码重置成功',
+          {
+            confirmButtonText: '确定'
+          }
+        )
+      } else {
+        ElMessage.error(response.message || '密码重置失败')
+      }
+    } catch (error) {
+      console.error('重置密码失败:', error)
+      ElMessage.error(error.response?.data?.message || '密码重置失败')
+    }
+  }).catch(() => {
+    // 用户取消
+  })
 }
 
 const confirmDelete = (user) => {

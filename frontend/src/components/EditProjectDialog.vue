@@ -101,17 +101,32 @@
         </el-select>
       </el-form-item>
       
-      <!-- 项目日期 -->
-      <el-form-item label="项目时间">
+      <!-- 开始日期 -->
+      <el-form-item label="开始日期" prop="start_date">
         <el-date-picker
-          v-model="dateRange"
-          type="daterange"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
+          v-model="form.start_date"
+          type="date"
+          placeholder="请选择开始日期（非必填）"
           format="YYYY-MM-DD"
           value-format="YYYY-MM-DD"
+          clearable
           style="width: 100%;"
+          @change="handleStartDateChange"
+        />
+      </el-form-item>
+      
+      <!-- 预计完成日期 -->
+      <el-form-item label="预计完成日期" prop="end_date">
+        <el-date-picker
+          v-model="form.end_date"
+          type="date"
+          placeholder="请选择预计完成日期（非必填）"
+          format="YYYY-MM-DD"
+          value-format="YYYY-MM-DD"
+          clearable
+          :disabled-date="disabledEndDate"
+          style="width: 100%;"
+          @change="handleEndDateChange"
         />
       </el-form-item>
       
@@ -177,16 +192,38 @@ const form = reactive({
   status: 'initial_contact',
   contract_amount: null,
   received_amount: null,
-  start_date: '',
-  end_date: '',
+  start_date: null,
+  end_date: null,
   leader: ''
 })
 
-// 日期范围
-const dateRange = ref([])
-
 // 计算属性
 const isEdit = computed(() => !!props.project)
+
+// 日期验证函数
+const validateDateRange = (rule, value, callback) => {
+  // 如果两个日期都没填，验证通过
+  if (!form.start_date && !form.end_date) {
+    callback()
+    return
+  }
+  
+  // 如果只填了一个，验证通过
+  if (!form.start_date || !form.end_date) {
+    callback()
+    return
+  }
+  
+  // 如果两个都填了，检查结束日期是否晚于开始日期
+  const startDate = new Date(form.start_date)
+  const endDate = new Date(form.end_date)
+  
+  if (endDate < startDate) {
+    callback(new Error('预计完成日期不能早于开始日期'))
+  } else {
+    callback()
+  }
+}
 
 // 表单验证规则
 const rules = {
@@ -202,6 +239,12 @@ const rules = {
   ],
   leader: [
     { required: true, message: '请选择项目负责人', trigger: 'change' }
+  ],
+  start_date: [
+    { validator: validateDateRange, trigger: 'change' }
+  ],
+  end_date: [
+    { validator: validateDateRange, trigger: 'change' }
   ]
 }
 
@@ -217,17 +260,6 @@ watch(() => props.visible, (newVal) => {
 watch(dialogVisible, (newVal) => {
   if (!newVal) {
     emit('update:visible', false)
-  }
-})
-
-// 监听日期范围变化
-watch(dateRange, (newVal) => {
-  if (newVal && newVal.length === 2) {
-    form.start_date = newVal[0]
-    form.end_date = newVal[1]
-  } else {
-    form.start_date = ''
-    form.end_date = ''
   }
 })
 
@@ -276,8 +308,8 @@ const initDialog = async () => {
       partner: props.project.partner || '',
       contract_amount: props.project.contract_amount || null,
       received_amount: props.project.received_amount || null,
-      start_date: props.project.start_date || '',
-      end_date: props.project.end_date || '',
+      start_date: props.project.start_date || null,
+      end_date: props.project.end_date || null,
       leader: ''
     })
     
@@ -285,13 +317,9 @@ const initDialog = async () => {
     if (props.project.members && props.project.members.length > 0) {
       const leader = props.project.members.find(m => m.role === 'leader')
       if (leader) {
-        form.leader = leader.user_id || leader.user?.id || ''
+        // 后端返回的成员对象中 id 字段就是用户ID
+        form.leader = leader.id || ''
       }
-    }
-    
-    // 设置日期范围
-    if (form.start_date && form.end_date) {
-      dateRange.value = [form.start_date, form.end_date]
     }
   } else {
     // 创建模式，重置表单
@@ -322,11 +350,10 @@ const resetForm = () => {
     partner: '',
     contract_amount: null,
     received_amount: null,
-    start_date: '',
-    end_date: '',
+    start_date: null,
+    end_date: null,
     leader: ''
   })
-  dateRange.value = []
   
   nextTick(() => {
     formRef.value?.clearValidate()
@@ -376,6 +403,36 @@ const submitForm = async () => {
     ElMessage.error('操作失败，请重试')
   } finally {
     loading.value = false
+  }
+}
+
+// 禁用结束日期（不能早于开始日期）
+const disabledEndDate = (time) => {
+  if (!form.start_date) {
+    return false
+  }
+  const startDate = new Date(form.start_date)
+  startDate.setHours(0, 0, 0, 0)
+  return time.getTime() < startDate.getTime()
+}
+
+// 处理开始日期变化
+const handleStartDateChange = () => {
+  // 触发结束日期的验证
+  if (form.end_date) {
+    nextTick(() => {
+      formRef.value?.validateField('end_date')
+    })
+  }
+}
+
+// 处理结束日期变化
+const handleEndDateChange = () => {
+  // 触发开始日期的验证
+  if (form.start_date) {
+    nextTick(() => {
+      formRef.value?.validateField('start_date')
+    })
   }
 }
 

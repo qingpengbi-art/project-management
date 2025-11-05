@@ -462,3 +462,94 @@ class UserService:
                 'message': f'用户删除失败: {str(e)}',
                 'data': None
             }
+
+    @staticmethod
+    def change_password(user_id: int, old_password: str, new_password: str) -> Dict[str, Any]:
+        """
+        用户修改自己的密码
+        
+        Args:
+            user_id: 用户ID
+            old_password: 旧密码
+            new_password: 新密码
+            
+        Returns:
+            修改结果
+        """
+        try:
+            user = User.query.get(user_id)
+            if not user:
+                return {
+                    'success': False,
+                    'message': '用户不存在',
+                    'data': None
+                }
+            
+            # 验证旧密码
+            if not user.check_password(old_password):
+                return {
+                    'success': False,
+                    'message': '旧密码不正确',
+                    'data': None
+                }
+            
+            # 设置新密码
+            user.set_password(new_password)
+            db.session.commit()
+            
+            return {
+                'success': True,
+                'message': '密码修改成功',
+                'data': None
+            }
+            
+        except Exception as e:
+            db.session.rollback()
+            return {
+                'success': False,
+                'message': f'密码修改失败: {str(e)}',
+                'data': None
+            }
+    
+    @staticmethod
+    def reset_password(user_id: int) -> Dict[str, Any]:
+        """
+        重置用户密码为初始密码 td123456
+        只有部门主管可以执行此操作
+        
+        Args:
+            user_id: 用户ID
+            
+        Returns:
+            重置结果
+        """
+        try:
+            user = User.query.get(user_id)
+            if not user:
+                return {
+                    'success': False,
+                    'message': '用户不存在',
+                    'data': None
+                }
+            
+            # 设置为初始密码
+            initial_password = 'td123456'
+            user.set_password(initial_password)
+            db.session.commit()
+            
+            return {
+                'success': True,
+                'message': f'密码已重置为初始密码: {initial_password}',
+                'data': {
+                    'username': user.username,
+                    'password': initial_password
+                }
+            }
+            
+        except Exception as e:
+            db.session.rollback()
+            return {
+                'success': False,
+                'message': f'密码重置失败: {str(e)}',
+                'data': None
+            }

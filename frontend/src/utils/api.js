@@ -163,6 +163,11 @@ export const projectApi = {
     return api.put(`/projects/${id}/progress`, data)
   },
   
+  // 更新手动进度（前期阶段）
+  updateManualProgress(id, progress) {
+    return api.put(`/projects/${id}/manual-progress`, { progress })
+  },
+  
   // 获取部门总览
   getDepartmentOverview() {
     return api.get('/projects/overview')
@@ -315,6 +320,16 @@ export const userApi = {
   // 更新成员角色
   updateMemberRole(projectId, userId, data) {
     return api.put(`/users/projects/${projectId}/members/${userId}/role`, data)
+  },
+  
+  // 修改密码
+  changePassword(data) {
+    return api.put('/users/change-password', data)
+  },
+  
+  // 重置密码（部门主管权限）
+  resetPassword(userId) {
+    return api.put(`/users/${userId}/reset-password`)
   }
 }
 

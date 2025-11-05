@@ -694,6 +694,13 @@ class ModuleService:
             for project in projects:
                 project_dict = project.to_dict()
                 
+                # 使用新的进度计算逻辑
+                from .project_service import ProjectService
+                progress_info = ProjectService.calculate_project_progress(project)
+                project_dict['progress'] = progress_info['progress']  # 使用实时计算的进度
+                project_dict['progress_type'] = progress_info.get('type', 'unknown')
+                project_dict['progress_info'] = progress_info.get('info', '')
+                
                 # 获取项目模块
                 modules = ProjectModule.query.filter_by(project_id=project.id)\
                     .order_by(ProjectModule.priority.desc(), ProjectModule.created_at).all()
@@ -1148,6 +1155,14 @@ class ModuleService:
                     modules_data.append(module_dict)
                 
                 project_dict = project.to_dict()
+                
+                # 使用新的进度计算逻辑
+                from .project_service import ProjectService
+                progress_info = ProjectService.calculate_project_progress(project)
+                project_dict['progress'] = progress_info['progress']  # 使用实时计算的进度
+                project_dict['progress_type'] = progress_info.get('type', 'unknown')
+                project_dict['progress_info'] = progress_info.get('info', '')
+                
                 project_dict['modules'] = modules_data
                 
                 # 添加项目成员信息
@@ -1257,6 +1272,14 @@ class ModuleService:
                     modules_data.append(module_dict)
                 
                 project_dict = project.to_dict()
+                
+                # 使用新的进度计算逻辑
+                from .project_service import ProjectService
+                progress_info = ProjectService.calculate_project_progress(project)
+                project_dict['progress'] = progress_info['progress']  # 使用实时计算的进度
+                project_dict['progress_type'] = progress_info.get('type', 'unknown')
+                project_dict['progress_info'] = progress_info.get('info', '')
+                
                 project_dict['modules'] = modules_data
                 
                 # 添加项目成员信息

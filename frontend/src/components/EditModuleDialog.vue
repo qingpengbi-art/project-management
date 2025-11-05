@@ -57,16 +57,28 @@
             </div>
           </el-form-item>
           
-          <!-- 预计时间 -->
-          <el-form-item label="预计时间">
+          <!-- 开始时间 -->
+          <el-form-item label="开始时间">
             <el-date-picker
-              v-model="dateRange"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
+              v-model="form.start_date"
+              type="date"
+              placeholder="选择开始日期（非必填）"
               format="YYYY-MM-DD"
               value-format="YYYY-MM-DD"
+              clearable
+              style="width: 100%;"
+            />
+          </el-form-item>
+          
+          <!-- 结束时间 -->
+          <el-form-item label="结束时间">
+            <el-date-picker
+              v-model="form.end_date"
+              type="date"
+              placeholder="选择结束日期（非必填）"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              clearable
               style="width: 100%;"
             />
           </el-form-item>
@@ -265,12 +277,9 @@ const form = reactive({
   name: '',
   description: '',
   status: '',
-  start_date: '',
-  end_date: ''
+  start_date: null,
+  end_date: null
 })
-
-// 日期范围
-const dateRange = ref([])
 
 // 表单验证规则
 const rules = {
@@ -522,17 +531,6 @@ const handleClose = () => {
   visible.value = false
 }
 
-// 监听日期范围变化
-watch(dateRange, (newVal) => {
-  if (newVal && newVal.length === 2) {
-    form.start_date = newVal[0]
-    form.end_date = newVal[1]
-  } else {
-    form.start_date = ''
-    form.end_date = ''
-  }
-})
-
 // 监听对话框打开
 watch(() => props.modelValue, async (newVal) => {
   if (newVal && props.module) {
@@ -541,16 +539,9 @@ watch(() => props.modelValue, async (newVal) => {
       name: props.module.name || '',
       description: props.module.description || '',
       status: props.module.status || 'not_started',
-      start_date: props.module.start_date || '',
-      end_date: props.module.end_date || ''
+      start_date: props.module.start_date || null,
+      end_date: props.module.end_date || null
     })
-    
-    // 初始化日期范围
-    if (props.module.start_date && props.module.end_date) {
-      dateRange.value = [props.module.start_date, props.module.end_date]
-    } else {
-      dateRange.value = []
-    }
     
     // 确保有用户数据
     if (userStore.users.length === 0) {

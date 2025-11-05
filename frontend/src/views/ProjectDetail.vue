@@ -11,9 +11,6 @@
               <span class="status-badge" :class="project.status">
                 {{ projectStore.getStatusText(project.status) }}
               </span>
-              <span class="priority-text">
-                优先级: {{ projectStore.getPriorityText(project.priority) }}
-              </span>
             </div>
             <!-- 项目类型和合作方信息 -->
             <div class="project-source-info">
@@ -37,9 +34,19 @@
         </div>
       </div>
 
-      <!-- 项目进度 - 只在横向和自研项目显示 -->
-      <div v-if="project.project_source !== 'vertical'" class="progress-section apple-card">
-        <h3 class="section-title">项目进度</h3>
+      <!-- 项目进度 - 只在横向和自研项目显示，不再跟进项目不显示 -->
+      <div v-if="project.project_source !== 'vertical' && project.status !== 'no_follow_up'" class="progress-section apple-card">
+        <div class="section-header">
+          <h3 class="section-title">项目进度</h3>
+          <el-button
+            v-if="canUpdateProgress"
+            type="primary"
+            size="small"
+            @click="showUpdateProgressDialog"
+          >
+            更新进度
+          </el-button>
+        </div>
         <div class="progress-content">
           <div class="progress-display">
             <div class="progress-circle">
@@ -60,6 +67,11 @@
                 <span>开始日期: {{ formatDate(project.start_date) }}</span>
                 <span>预计完成: {{ formatDate(project.end_date) }}</span>
                 <span v-if="project.actual_end_date">实际完成: {{ formatDate(project.actual_end_date) }}</span>
+              </div>
+              <div class="project-duration-wrapper">
+                <span class="project-duration">
+                  项目总时间: {{ calculateProjectDuration(project.start_date, project.end_date) }}
+                </span>
               </div>
             </div>
           </div>
@@ -180,49 +192,25 @@
       <div class="members-section apple-card">
         <div class="section-header">
           <h3 class="section-title">项目成员</h3>
-          <el-button size="small" type="primary" plain>
-            管理成员
-          </el-button>
         </div>
-        <div class="members-grid">
+        
+        <div v-if="allProjectMembers.length === 0" class="empty-members">
+          <p>暂无项目成员</p>
+          <p class="empty-tip">请在项目模块中分配成员</p>
+        </div>
+        
+        <div v-else class="members-grid">
           <div
-            v-for="member in project.members"
+            v-for="member in allProjectMembers"
             :key="member.id"
             class="member-card"
           >
             <div class="member-avatar">
-              {{ member.user.name.charAt(0) }}
+              {{ member.name.charAt(0) }}
             </div>
             <div class="member-info">
-              <div class="member-name">{{ member.user.name }}</div>
-              <div class="member-position">{{ member.user.position || '未知职位' }}</div>
-              <div class="member-role" :class="member.role">
-                {{ userStore.getProjectRoleText(member.role) }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 进度历史 -->
-      <div class="history-section apple-card">
-        <h3 class="section-title">进度历史</h3>
-        <div class="history-timeline">
-          <div
-            v-for="record in project.progress_history"
-            :key="record.id"
-            class="timeline-item"
-          >
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-              <div class="timeline-header">
-                <span class="progress-value">进度更新至 {{ record.progress }}%</span>
-                <span class="update-time">{{ formatDateTime(record.updated_at) }}</span>
-              </div>
-              <div class="timeline-body">
-                <p class="update-notes">{{ record.notes || '无备注' }}</p>
-                <span class="updated-by">更新人: {{ record.updated_by.name }}</span>
-              </div>
+              <div class="member-name">{{ member.name }}</div>
+              <div class="member-position">{{ member.position || '未知职位' }}</div>
             </div>
           </div>
         </div>
@@ -259,6 +247,13 @@
       :project-name="project?.name"
       @success="handleModuleUpdateSuccess"
     />
+    
+    <!-- 更新项目进度对话框 -->
+    <UpdateProgressDialog
+      v-model:visible="updateProgressDialogVisible"
+      :project="project"
+      @success="handleProgressUpdateSuccess"
+    />
 
     <!-- 编辑模块对话框 -->
     <EditModuleDialog
@@ -281,6 +276,7 @@ import { useModuleStore } from '@/stores/module'
 import { useAuthStore } from '@/stores/auth'
 import CreateModuleDialog from '@/components/CreateModuleDialog.vue'
 import UpdateModuleProgressDialog from '@/components/UpdateModuleProgressDialog.vue'
+import UpdateProgressDialog from '@/components/UpdateProgressDialog.vue'
 import EditModuleDialog from '@/components/EditModuleDialog.vue'
 
 const route = useRoute()
@@ -293,18 +289,81 @@ const authStore = useAuthStore()
 // 响应式数据
 const createModuleDialogVisible = ref(false)
 const updateModuleProgressDialogVisible = ref(false)
-const assignModuleDialogVisible = ref(false)
 const editModuleDialogVisible = ref(false)
+const updateProgressDialogVisible = ref(false)
 const selectedModule = ref(null)
 
 // 计算属性
 const project = computed(() => projectStore.currentProject)
 const modules = computed(() => moduleStore.modules)
 
+// 获取所有项目成员（从模块中收集）
+const allProjectMembers = computed(() => {
+  if (!modules.value || modules.value.length === 0) {
+    return []
+  }
+  
+  const memberMap = new Map()
+  
+  modules.value.forEach(module => {
+    // 使用 assigned_users 而不是 assignments
+    if (module.assigned_users && module.assigned_users.length > 0) {
+      module.assigned_users.forEach(user => {
+        if (user) {
+          if (!memberMap.has(user.id)) {
+            memberMap.set(user.id, {
+              id: user.id,
+              name: user.name,
+              position: user.position,
+              modules: []
+            })
+          }
+          memberMap.get(user.id).modules.push(module.name)
+        }
+      })
+    }
+  })
+  
+  return Array.from(memberMap.values())
+})
+
 // 方法
 const formatDate = (dateString) => {
   if (!dateString) return '未设置'
   return new Date(dateString).toLocaleDateString('zh-CN')
+}
+
+// 计算项目总时间
+const calculateProjectDuration = (startDate, endDate) => {
+  // 如果日期不完整，返回 "-"
+  if (!startDate || !endDate) {
+    return '-'
+  }
+  
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  const diffTime = Math.abs(end - start)
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  
+  // 0天的情况
+  if (diffDays === 0) {
+    return '当天完成'
+  }
+  
+  if (diffDays < 30) {
+    return `${diffDays}天`
+  } else if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30)
+    const days = diffDays % 30
+    return days > 0 ? `${months}个月${days}天` : `${months}个月`
+  } else {
+    const years = Math.floor(diffDays / 365)
+    const months = Math.floor((diffDays % 365) / 30)
+    if (months > 0) {
+      return `${years}年${months}个月`
+    }
+    return `${years}年`
+  }
 }
 
 // 获取项目类型文本
@@ -367,11 +426,6 @@ const showUpdateModuleProgress = (module) => {
   updateModuleProgressDialogVisible.value = true
 }
 
-const showAssignModule = (module) => {
-  // TODO: 实现分配模块对话框
-  selectedModule.value = module
-  ElMessage.info('分配模块功能开发中...')
-}
 
 const showEditModule = (module) => {
   selectedModule.value = module
@@ -386,6 +440,29 @@ const handleModuleEditSuccess = () => {
   // 刷新模块数据
   moduleStore.fetchProjectModules(parseInt(route.params.id))
   ElMessage.success('模块编辑成功')
+}
+
+// 更新项目进度相关
+const canUpdateProgress = computed(() => {
+  // 只有前期阶段才显示更新进度按钮
+  const earlyStatuses = [
+    'initial_contact',
+    'proposal_submitted',
+    'quotation_submitted',
+    'user_confirmation',
+    'contract_signed'
+  ]
+  return project.value && earlyStatuses.includes(project.value.status)
+})
+
+const showUpdateProgressDialog = () => {
+  updateProgressDialogVisible.value = true
+}
+
+const handleProgressUpdateSuccess = () => {
+  // 刷新项目数据
+  projectStore.fetchProjectDetail(parseInt(route.params.id))
+  ElMessage.success('项目进度更新成功')
 }
 
 const loadProjectDetail = async () => {
@@ -461,11 +538,6 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-.priority-text {
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-}
 
 // 项目类型信息
 .project-source-info {
@@ -679,6 +751,19 @@ onMounted(() => {
   }
 }
 
+.project-duration-wrapper {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+  
+  .project-duration {
+    color: var(--apple-blue);
+    font-weight: 600;
+    font-size: 16px;
+    display: block;
+  }
+}
+
 .modules-section {
   padding: 24px;
   margin-bottom: 24px;
@@ -868,6 +953,22 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
+.empty-members {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+  
+  p {
+    margin: 8px 0;
+    font-size: 14px;
+  }
+  
+  .empty-tip {
+    font-size: 13px;
+    color: var(--text-tertiary);
+  }
+}
+
 .members-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -911,8 +1012,9 @@ onMounted(() => {
 .member-position {
   font-size: 13px;
   color: var(--text-secondary);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
+
 
 .member-role {
   padding: 2px 8px;
@@ -932,85 +1034,6 @@ onMounted(() => {
   }
 }
 
-.history-section {
-  padding: 24px;
-}
-
-.history-timeline {
-  position: relative;
-  padding-left: 24px;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    left: 8px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--border-color);
-  }
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 24px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.timeline-dot {
-  position: absolute;
-  left: -20px;
-  top: 8px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--apple-blue);
-  border: 2px solid var(--bg-primary);
-}
-
-.timeline-content {
-  background: var(--bg-secondary);
-  padding: 16px;
-  border-radius: var(--border-radius-small);
-  margin-left: 8px;
-}
-
-.timeline-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.progress-value {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.update-time {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.timeline-body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.update-notes {
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin: 0;
-}
-
-.updated-by {
-  font-size: 13px;
-  color: var(--text-tertiary);
-}
 
 .loading-state {
   padding: 40px;
@@ -1051,12 +1074,6 @@ onMounted(() => {
   
   .members-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .timeline-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
   }
 }
 </style>

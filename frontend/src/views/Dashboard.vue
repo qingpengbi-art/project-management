@@ -220,9 +220,9 @@
           </el-table-column>
           
           <!-- 项目名称 -->
-          <el-table-column prop="name" label="项目名称" min-width="100" show-overflow-tooltip align="left" header-align="center">
+          <el-table-column prop="name" label="项目名称" min-width="150" align="left" header-align="center">
             <template #default="{ row }">
-              <div class="project-name">
+              <div class="project-name-cell">
                 <span class="name">{{ row.name }}</span>
                 <el-tag 
                   v-if="getUserProjectRole(row)" 
@@ -263,11 +263,11 @@
           </el-table-column>
           
           <!-- 合同金额 -->
-          <el-table-column prop="contract_amount" width="110" align="right" header-align="center">
+          <el-table-column prop="contract_amount" width="120" align="right" header-align="center">
             <template #header>
               <div class="amount-header">
                 <div>合同金额</div>
-                <div class="unit-label">(万元)</div>
+                <div class="unit-text">(万元)</div>
               </div>
             </template>
             <template #default="{ row }">
@@ -279,11 +279,11 @@
           </el-table-column>
           
           <!-- 到账金额 -->
-          <el-table-column prop="received_amount" width="110" align="right" header-align="center">
+          <el-table-column prop="received_amount" width="120" align="right" header-align="center">
             <template #header>
               <div class="amount-header">
                 <div>到账金额</div>
-                <div class="unit-label">(万元)</div>
+                <div class="unit-text">(万元)</div>
               </div>
             </template>
             <template #default="{ row }">
@@ -294,10 +294,10 @@
             </template>
           </el-table-column>
           
-          <!-- 项目进度（纵向项目不显示） -->
+          <!-- 项目进度（纵向项目和不再跟进项目不显示） -->
           <el-table-column prop="progress" label="项目进度" width="150" align="center" header-align="center">
             <template #default="{ row }">
-              <div v-if="row.project_source !== 'vertical'" class="progress-cell">
+              <div v-if="row.project_source !== 'vertical' && row.status !== 'no_follow_up'" class="progress-cell">
                 <div class="progress-bar">
                   <div 
                     class="progress-fill"
@@ -1516,13 +1516,13 @@ onMounted(() => {
     
     .status-count-uniform {
       color: var(--theme-color);
-    }
-    
-    &:hover {
-      border-color: var(--theme-color);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
+  }
+  
+  &:hover {
+    border-color: var(--theme-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
   }
   
   &:not(.active) {
@@ -1532,9 +1532,9 @@ onMounted(() => {
     
     &:hover {
       transform: none;
-    }
-    
-    .status-count-uniform {
+}
+
+.status-count-uniform {
       color: #C7C7CC !important;
     }
   }
@@ -2104,20 +2104,51 @@ onMounted(() => {
   border-color: #409eff;
 }
 
+// 项目名称单元格 - 支持换行显示
+.project-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+    line-height: 1.5;
+    word-break: break-word;
+    white-space: normal;
+  }
+  
+  .role-tag {
+    align-self: flex-start;
+  }
+}
+
+// 旧的project-name类保留（用于其他地方）
 .project-name {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
 .role-tag {
   margin-left: 4px;
+}
+
+// 金额列表头 - 两行显示
+.amount-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  line-height: 1.4;
+  
+  .unit-text {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
 }
 
 // 项目状态标签 - 使用与卡片一致的颜色
@@ -2222,20 +2253,6 @@ onMounted(() => {
 .no-partner {
   color: var(--apple-gray-5);
   font-size: 13px;
-}
-
-.amount-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.3;
-  
-  .unit-label {
-    font-size: 11px;
-    color: var(--apple-gray-5);
-    font-weight: 400;
-    margin-top: 2px;
-  }
 }
 
 .amount-text {

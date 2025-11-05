@@ -209,3 +209,74 @@ def update_member_role(project_id, user_id):
             'message': f'更新成员角色时发生错误: {str(e)}',
             'data': None
         }), 500
+
+@user_bp.route('/change-password', methods=['PUT'])
+@login_required
+def change_password():
+    """用户修改自己的密码"""
+    try:
+        data = request.get_json()
+        current_user = request.current_user
+        
+        # 验证必填字段
+        if not data or not data.get('old_password') or not data.get('new_password'):
+            return jsonify({
+                'success': False,
+                'message': '旧密码和新密码不能为空',
+                'data': None
+            }), 400
+        
+        # 验证新密码长度
+        if len(data['new_password']) < 6:
+            return jsonify({
+                'success': False,
+                'message': '新密码长度不能少于6位',
+                'data': None
+            }), 400
+        
+        result = UserService.change_password(
+            current_user.id,
+            data['old_password'],
+            data['new_password']
+        )
+        
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'修改密码时发生错误: {str(e)}',
+            'data': None
+        }), 500
+
+@user_bp.route('/<int:user_id>/reset-password', methods=['PUT'])
+@login_required
+def reset_password(user_id):
+    """部门主管重置用户密码为初始密码"""
+    try:
+        current_user = request.current_user
+        
+        # 验证权限：只有部门主管才能重置密码
+        if current_user.role != 'supervisor':
+            return jsonify({
+                'success': False,
+                'message': '只有部门主管才能重置密码',
+                'data': None
+            }), 403
+        
+        result = UserService.reset_password(user_id)
+        
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'重置密码时发生错误: {str(e)}',
+            'data': None
+        }), 500

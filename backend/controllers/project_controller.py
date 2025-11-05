@@ -209,6 +209,48 @@ def update_project_progress(project_id):
             'data': None
         }), 500
 
+@project_bp.route('/<int:project_id>/manual-progress', methods=['PUT'])
+@login_required
+def update_manual_progress(project_id):
+    """
+    更新项目的手动进度
+    仅适用于前期阶段（初步接触 → 合同签订）
+    """
+    try:
+        data = request.get_json()
+        progress = data.get('progress')
+        
+        if progress is None:
+            return jsonify({
+                'success': False,
+                'message': '进度值不能为空',
+                'data': None
+            }), 400
+        
+        # 验证进度值类型
+        try:
+            progress = int(progress)
+        except (ValueError, TypeError):
+            return jsonify({
+                'success': False,
+                'message': '进度值必须是整数',
+                'data': None
+            }), 400
+        
+        result = ProjectService.update_manual_progress(project_id, progress)
+        
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'更新进度失败: {str(e)}',
+            'data': None
+        }), 500
+
 @project_bp.route('/overview', methods=['GET'])
 def get_department_overview():
     """获取部门项目总览"""
